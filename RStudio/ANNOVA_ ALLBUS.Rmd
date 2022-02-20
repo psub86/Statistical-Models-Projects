@@ -1,0 +1,679 @@
+---
+title: "Task No.6: Hypothesis of Difference"
+output: html_notebook
+---
+----------------------------------------------------------------------------------------------------------
+ ****** **Understanding DATA & Performing DATA Munging** ***********************************
+----------------------------------------------------------------------------------------------------------
+
+
+
+```{r}
+library(readxl)
+df <- read_excel("C:/Users/Alfa/Desktop/Statistik/Abschluss_Project_Statistics/dataset/ALLBUS.xlsx")
+View(df)
+```
+
+
+# Population
+
+# About dataset and variables:
+
+Identification information: ID
+Personal details: gender, year of birth, height, weight
+Information on education: school leaving certificate, highest professional qualification
+Information on the education of the parents: school leaving certificate of the father and mother as well as highest professional qualification of the father and mother
+Information on employment: type of employment, hours worked, income
+Health information: visits to the doctor and whether you are a smoker
+Information on life satisfaction
+
+
+```{r}
+### Check Missing Value
+sum(is.na(df))
+sprintf("Coun of Null Values: %d",sum(is.na(df)) )
+
+
+# Auslassen der NA-Werte 
+df <- na.omit(df)
+sum(is.na(df))
+sprintf("After deleting: %d",sum(is.na(df)) )
+
+```
+
+```{r}
+summary(df)
+```
+
+```{r}
+dim(df)
+```
+```{r}
+hist(df$ARBEITSSTD)
+```
+```{r}
+hist(df$GRO)
+```
+
+```{r}
+hist(df$GEW)
+```
+```{r}
+hist(df$NETTO)
+```
+
+### Handisches Loeschen von Daten
+  
+```{r}
+ausreiser <- boxplot(df$NETTO)
+ausreiser$out
+nrow(df)
+# Diese Zeilen sollen entfernt werden
+#drops <- c(65,63,97,163)
+
+# Zeilen loeschen
+#FaithfulFaces <- FaithfulFaces[-drops,]
+#nrow(FaithfulFaces)
+```
+```{r}
+
+boxplot(df$NETTO) # Boxplot
+# Suche der Ausreiser
+outliers <- boxplot(df$NETTO, plot=FALSE)$out 
+#Ausgabe der Ausreiser
+print(outliers)
+#Wegfilter der Ausreiser
+df <- df[-which(df$NETTO %in% outliers),]
+#Boxplot
+boxplot(df$NETTO)
+
+```
+
+```{r}
+hist(df$NETTO)
+```
+```{r}
+
+boxplot(df$NETTO) # Boxplot
+# Suche der Ausreiser
+outliers <- boxplot(df$NETTO, plot=FALSE)$out 
+#Ausgabe der Ausreiser
+print(outliers)
+#Wegfilter der Ausreiser
+df <- df[-which(df$NETTO %in% outliers),]
+#Boxplot
+boxplot(df$NETTO)
+
+```
+```{r}
+h<- hist(df$NETTO, ylim = c(0, 400), col="pink",border="brown")
+#lines(frequency('Your Last Semester GPA:`))
+
+
+
+xfit <- seq(min(df$NETTO),max(df$NETTO), length= 40)
+
+yfit <- dnorm(xfit,mean=mean(df$NETTO),sd=sd(df$NETTO))
+
+yfit <- yfit*diff(h$mids[1:2])*length(df$NETTO)
+
+lines(xfit, yfit, col="blue", lwd=2)
+
+text(h$mids,h$counts,labels=h$counts, adj=c(0.5, -0.5))
+
+abline(v = mean(df$NETTO),                       # Add line for mean
+       col = "yellow",
+       lwd = 3)
+text(x = mean(df$NETTO) * 0.77,                   # Add text for mean
+     y = mean(df$NETTO) * 39.7,
+     paste("Mean =", mean(df$NETTO)),
+     col = "black",
+     )
+
+
+abline(v = median(df$NETTO),                       # Add line for mean
+       col = "green",
+       lwd = 3)
+```
+
+
+
+
+
+```{r}
+hist(df$NETTO)
+```
+
+```{r}
+hist(df$ZUFR, breaks = 18)
+```
+
+```{r}
+h<- hist(df$ZUFR, ylim= c(0,500), breaks = 14, col="pink",border="brown")
+#lines(frequency('Your Last Semester GPA:`))
+
+
+
+xfit <- seq(min(df$ZUFR),max(df$ZUFR), length= 40)
+
+yfit <- dnorm(xfit,mean=mean(df$ZUFR),sd=sd(df$ZUFR))
+
+yfit <- yfit*diff(h$mids[1:2])*length(df$ZUFR)
+
+lines(xfit, yfit, col="blue", lwd=2)
+
+text(h$mids,h$counts,labels=h$counts, adj=c(0.5, -0.5))
+
+abline(v = mean(df$ZUFR),                       # Add line for mean
+       col = "yellow",
+       lwd = 3)
+text(x = mean(df$ZUFR) * 0.77,                   # Add text for mean
+     y = mean(df$ZUFR) * 39.7,
+     paste("Mean =", mean(df$ZUFR)),
+     col = "black",
+     )
+
+
+abline(v = median(df$ZUFR),                       # Add line for mean
+       col = "green",
+       lwd = 3)
+```
+```{r}
+shapiro.test(df$ZUFR)
+```
+
+
+```{r}
+counts <- table(df$GESCHL)
+counts
+barplot(counts)
+```
+
+
+```{r}
+counts <- table(df$SCHULABSCHLUSS)
+barplot(counts)
+
+```
+
+
+```{r}
+counts <- table(df$HOE_ABSCHLUSS)
+barplot(counts)
+
+```
+
+```{r}
+counts <- table(df$BERUFSTAETIG)
+barplot(counts)
+
+```
+
+
+```{r}
+counts <- table(df$ARBEITSSTD)
+barplot(counts)
+
+```
+
+
+```{r}
+hist(df$ARZTBES)
+```
+
+```{r}
+
+boxplot(df$ARZTBES) # Boxplot
+# Suche der Ausreiser
+outliers <- boxplot(df$ARZTBES, plot=FALSE)$out 
+#Ausgabe der Ausreiser
+print(outliers)
+#Wegfilter der Ausreiser
+df <- df[-which(df$ARZTBES %in% outliers),]
+#Boxplot
+boxplot(df$ARZTBES)
+
+```
+```{r}
+hist(df$ARZTBES)
+
+shapiro.test(df$ARZTBES)
+```
+
+
+```{r}
+hist(df$ARBEITSSTD)
+
+```
+
+
+
+
+
+```{r}
+counts <- table(df$RAUCH)
+barplot(counts)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Assignment No. 6: Hypothesis of Difference ( One-way ANOVA without repeated measurement)
+
+
+Datensatz: ALLBUS.xlxs
+
+
+
+## Read the dataset
+```{r}
+ALLBUS <- df
+View(ALLBUS)
+```
+
+**Die Allgemeine Bevölkerungsumfrage der Sozialwissenschaften**
+(ALLBUS), the German General Social Survey is a biennial survey that has been conducted since 1980 on the demographic, social and many more structure of people residing in Germany.
+
+```{r}
+head(ALLBUS, 50)
+```
+## Targeted Variable
+Var 1 = NETTO </br>
+Var 2 = HOESCHULABSCHLUSS
+
+
+## Call the librabries
+```{r include=FALSE, results='hide'}
+library(ggplot2) #Diagramme
+library(dplyr)   # %<% Gruppierung 
+library(psych)   # Dis. Statistik
+library(car)    # levene
+library(effsize) #eta
+library(lsr)    #eta
+library(Hmisc)
+```
+
+```{r}
+h<- hist(ALLBUS$NETTO, ylim = c(0, 400), col="pink",border="brown")
+#lines(frequency('Your Last Semester GPA:`))
+
+
+
+xfit <- seq(min(ALLBUS$NETTO),max(ALLBUS$NETTO), length= 40)
+
+yfit <- dnorm(xfit,mean=mean(ALLBUS$NETTO),sd=sd(ALLBUS$NETTO))
+
+yfit <- yfit*diff(h$mids[1:2])*length(ALLBUS$NETTO)
+
+lines(xfit, yfit, col="blue", lwd=2)
+
+text(h$mids,h$counts,labels=h$counts, adj=c(0.5, -0.5))
+
+abline(v = mean(ALLBUS$NETTO),                       # Add line for mean
+       col = "yellow",
+       lwd = 3)
+text(x = mean(ALLBUS$NETTO) * 0.77,                   # Add text for mean
+     y = mean(ALLBUS$NETTO) * 39.7,
+     paste("Mean =", mean(ALLBUS$NETTO)),
+     col = "black",
+     )
+
+
+abline(v = median(df$NETTO),                       # Add line for mean
+       col = "green",
+       lwd = 3)
+```
+
+```{r}
+counts <- table(ALLBUS$HOE_ABSCHLUSS)
+# barchart with added parameters
+barplot(counts,
+main = "People_Count respect to their Education",
+xlab = "Values",
+ylab = "Education Group",
+names.arg = c("KEIN ABSCHLUSS", "LEHRE","ANDERER ABSCHLUSS", "FACHHOCHSCHULABSCHL.", "MEISTER, TECHNIKER", "HOCHSCHULABSCHLUSS"),
+col = "pink",
+horiz = TRUE)
+```
+## 1) Hypothese 
+
+H1: There is a mean difference in Income value of the population with respect to their highest professional qualification ("LEHRE", "HOCHSCHULABSCHLUSS","ANDERER ABSCHLUSS", "FACHHOCHSCHULABSCHL.", "KEIN ABSCHLUSS","MEISTER, TECHNIKER")  
+
+$$M1≠M2≠M3≠M4≠M5≠M6$$ atleast one of the combination</br>
+
+H0: There is NO mean difference in Income value of the population with respect to their highest professional qualification ("LEHRE", "HOCHSCHULABSCHLUSS","ANDERER ABSCHLUSS", "FACHHOCHSCHULABSCHL.", "KEIN ABSCHLUSS","MEISTER, TECHNIKER")  
+
+$$M1=M2=M3=M4=M5=M6$$
+## 2) Prerequisites for one-way analysis of variance w/o repetition of measurements
+
+✓ The **NETTO** (Income) is a dependent variable and ratio-scaled.
+ 
+✓ The independent variable **HOE_SCHULABSCHLUSS**(Highest professional qualification) is categorical(ordinal scaled).
+
+✓ The groups formed by the factor data in(HOE_SCHULABSCHLUSS) are independent.
+
+✓ The dependent variable is normally distributed within each of the groups -> YES, confirmed   
+   using Histogram and qqplot.
+
+✓ Homogeneity of the variances, which means that the groups come from populations with
+approximately identical variances of the dependent variables -> Yes,confirmed through Levene test
+
+## 3) Basic Concept of Oneway ANOVA w/o repeated measurement
+
+The one-way analysis of variance - also "one-way ANOVA", since "Analysis of Variance" in English - tests whether the means of several independent groups (or samples), which are defined by a categorical independent variable, differ. This categorical independent variable is called the "factor" in the context of analysis of variance. Correspondingly, the characteristics of the independent variable are called “factor levels”, with the term “treatments” also being used. **An analysis of variance** is referred to as "one-way" if it only uses one factor, i.e. a grouping variable, multi-factor analysis of variance).
+
+The principle of analysis of variance consists in decomposing the variance of the dependent variable. The total variance is made up of the so-called **"variance within the groups"** and the **"variance between the groups"**. These two proportions are compared with one another as part of an analysis of variance. One way ANOVA is a generalization of the t-test for independent samples for comparing more than two groups (or samples). The question of one way analysis of variance is often shortened as follows: 
+
+**"Do the means of an independent variable differ between several groups? Which factor levels differ? "** 
+
+## 4) Descriptive Statistics
+
+```{r}
+# sollte ein Meldung zum Thema "summarise" erscheinen - tauschen Sie s mit z oder anderes rum 
+ALLBUS %>%
+group_by(HOE_ABSCHLUSS) %>%
+  dplyr::summarise(Anzahl = n(),  Mittelwert = mean(NETTO), Median = median(NETTO), Standardabweichung = sd(NETTO)) %>%
+  mutate_if(is.numeric, round, 2)
+```
+
+##### The above Description table shows the mean values, standard deviations and sizes of all 6 High Professional Education groups. This information is used for reporting the below findings:
+
+* There is difference in Mean values between the Education groups.
+
+* "HOCHSCHULABSCHLUSS" shows the highest Mean value (M = 2175.40, SD = 745.28, n = 197) within the Education group with regards to its Income, whereas "KEIN ABSCHLUSS" (M = 1142.03, SD = 699.12, n = 86) is the least earning group. 
+
+* Interestingly, there is NO large  difference in MEAN value between the Education group "FACHHOCHSCHULABSCHL."(M = 1908.89, SD = 843.92, n = 100) vs "MEISTER, TECHNIKER" (M = 1925.39, SD = 874.90, n = 126). 
+
+* Inspite oh having large number of entries for the "LEHRE" group it shows realtively less Mean value (M = 1518.82, SD = 596.76, n = 514) compared to "ANDERER ABSCHLUSS" group Mean value (M = 1683.84, SD = 694.54, n = 100) 
+
+
+## 5) Perform Check on the Pre-requisite for the Oneway ANOVA w/o repeated measurement  
+
+#### Understanding the Distribution
+
+```{r}
+# Box plot to check for any Outliers
+a <- ggplot(data = ALLBUS, aes(x = HOE_ABSCHLUSS, y = NETTO)) +
+geom_boxplot(fill = c("lightblue", "purple","green", "pink", "yellow", "orange"),
+            outlier.color = NULL) +
+            theme_classic() +
+            theme(legend.position = "none")+
+            geom_jitter(color="black", size=0.4, alpha=0.9)+
+            coord_flip()
+show(a)
+```
+
+There are outliers seen in "KEIN ABSCHLUSS" group and "LEHRE" group. There were only 12 entries found and we do not want to handle this ouliers as it didnt show any significane in the Statistical Description table above.
+
+```{r}
+# Confirming the Mean observation between groups
+
+a <- ggplot(data = ALLBUS, aes(x = HOE_ABSCHLUSS, y = NETTO)) +
+geom_boxplot(fill = c("lightgreen", "deepskyblue","tomato", "orange", "pink", "magenta"),
+            outlier.color = NULL) +
+            theme_classic() +
+            theme(legend.position = "none")+
+            coord_flip()
+show(a)
+```
+
+The Median value of "Fachhochschul_Abschluss" group and "Meister,Techniker" group  **overlap** each other and showing some correlation.
+
+#### Type of Distribution ( Histogram & QQ plot)
+
+```{r}
+#To get an initial overview of the data, it is advisable to create a histogram. 
+ALLBUS %>%
+  group_by(HOE_ABSCHLUSS) %>%
+  ggplot(aes(NETTO, color=HOE_ABSCHLUSS)) + 
+  geom_histogram(aes(fill = HOE_ABSCHLUSS), bins = 9) +
+  facet_wrap(~HOE_ABSCHLUSS) +
+  theme_grey()+
+  labs(x= "Income Value",y = "Highest Professional Education" )
+```
+
+
+```{r}
+### Alternativ confirmation through QQPlot
+
+library(car)
+qqPlot(NETTO ~ HOE_ABSCHLUSS, data=ALLBUS,layout=c(2, 4))
+```
+From the Histogram and QQplot, we can confirm that the data is normally distributed.
+
+## 5) Homogenitat Check through levene Test
+```{r}
+ALLBUS$HOE_ABSCHLUSS <- factor(ALLBUS$HOE_ABSCHLUSS , levels = unique(ALLBUS$HOE_ABSCHLUSS))
+```
+
+
+```{r}
+library(car)
+leveneTest(ALLBUS$NETTO ~ ALLBUS$HOE_ABSCHLUSS, center=mean)
+```
+In the present example, the Levene test is significant (F (5,1117) = 12.109, p = 1.919e-11), so that **heterogeneity of variance** can be assumed. That means - **a Welch correction** must be carried out.
+
+## 6) Results of the one-way analysis of variance without repetition of measurements 
+```{r}
+# This model is used in the post-hoc as well as in the Eta ^ 2.
+ANOVA <- aov (data = ALLBUS, NETTO ~ HOE_ABSCHLUSS) #Model formed
+ANOVA
+```
+
+### Perform ANOVA with Welch correction as our Levene test resulted heterogenous result
+```{r}
+ANOVAmitWelch <- oneway.test (ALLBUS$NETTO~ ALLBUS$HOE_ABSCHLUSS)
+ANOVAmitWelch
+```
+
+##### Findings:
+
+* The overall model has become significant (F (5,301.41) = 37.72, p = 2.2e-16). </br>
+
+* However, based on the ANOVA with Welch correction test results, it cannot be determined which of the 6 groups differ significantly from one another. </br>
+
+* It would be important to determine which one or more pairs differ significantly within the Education group and which pairs do not significantly difference between each other. </br>
+
+* Hence, a post-hoc test is needs to be performed.</br>
+
+
+## 9) Post hoc testing
+
+
+Although the F test(ANOVA) shows that there is a main effect of Income value based on Highest Professional Education, the post-hoc tests must be used to clarify between which factor levels (Highest Professional Education) there are significant differences in terms of Income value.
+
+$$ \frac{k\cdot(k-1)} {2}=\frac{6\cdot(6-1)}{2}=\frac{30}{2}= 15$$
+With
+
+$k$ = characteristics / groups / levels
+
+
+When calculating post-hoc tests, a t test is in principle carried out for every combination of two mean values. In the current example with 6 groups, there are 15 tests. However, multiple tests are problematic because the alpha error (the false rejection of the null hypothesis) increases with the number of comparisons.
+
+* If only one t-test with a **significance level of .05 is carried out, the probability that the alpha error will not occur is 95 percent. ** However, if 6 such pair comparisons are made, the probability of the alpha error not occurring is **(.95) ^ 15 = 0.4632**. 
+* To determine the **probability of occurrence of the alpha error, 1 - 0.4632 = 0.5368 is calculated**. 
+* The probability of the occurrence of the alpha error is thus at **46.32 percent**. 
+* This probability of error is our **Family Error Rate**.
+* The tukey, for example, can be used to remedy this problem and hence we choose this test.
+* RStudio takes the new level into account, so we can continue testing at 0.05.
+
+### Tukey test
+```{r}
+TUKEY<- TukeyHSD(aov(data=ALLBUS, ALLBUS$NETTO ~ ALLBUS$HOE_ABSCHLUSS))
+TUKEY
+
+```
+# Findings:</br>
+
+
+In the output above, 11 Education group combinations show statistically significant difference while using a family error rate of 0.05. The mean difference between each of these groups is mentioned below.
+
+![Mean Difference](C:/Users/Alfa/Desktop/Statistik/Project/Unbenannt.png)
+
+
+```{r}
+# Check the above TUKEY results
+par(mar=c(5,16,4,0)+0.1,mgp=c(5,1,0))
+plot(TUKEY , col="red",las = 1, cex.axis = 0.7)
+```
+```{r}
+# create a table based on TUKEY
+library(multcompView)
+generate_label_df <- function(TUKEY, variable){
+     Tukey.levels <- TUKEY[[variable]][,4]
+     Tukey.labels <- data.frame(multcompLetters(Tukey.levels)['Letters'])
+     Tukey.labels$music_tol=rownames(Tukey.labels)
+     Tukey.labels=Tukey.labels[order(Tukey.labels$music_tol) , ]
+     return(Tukey.labels)
+}
+ 
+LABELS <- generate_label_df(TUKEY , "ALLBUS$HOE_ABSCHLUSS")
+
+table(LABELS)
+```
+##### We can safely consider that the "FACHHOCHSCHULABSCHL" and "MEISTER,TECHNIKER" education group can be grouped together.
+
+## Profile diagram
+
+It is also interesting to see visual representation of the plots.
+
+```{r}
+ALLBUS$HOE_ABSCHLUSS <- factor(ALLBUS$HOE_ABSCHLUSS, levels=c("KEIN ABSCHLUSS", "LEHRE","ANDERER ABSCHLUSS", "FACHHOCHSCHULABSCHL.", "MEISTER, TECHNIKER", "HOCHSCHULABSCHLUSS"))  
+
+ggplot(ALLBUS, aes(x=HOE_ABSCHLUSS, y=NETTO, group=1))+
+  stat_summary(fun.y = mean, geom="point", size=3)+
+  stat_summary(fun.y = mean, geom="line")+
+  stat_summary(fun.data = mean_cl_normal, geom="errorbar",width=.2, size=.25)+
+  labs(x="HOE_SCHULABSCHLUSS", y="NETTO")+
+  theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1))
+  
+```
+Our earlier findings are confirmed through the above plot that shows, there are differences in the mean value within 6 education methods, whereas mean value for "FACHHOCHSCHULABSCHL" and "MEISTER,TECHNIKER" it is relatively same.
+
+## 9) Calculate the effect value
+
+### 9.1)The partial eta-square (partial η2) 
+
+The partial eta-square (partial η2) is a measure of the effect size: It relates the variation that is explained by a factor to the variation that is not explained by other factors in the model. This means that only those variations are considered that are not explained by the other factors in the model. The partial eta-square shows how much of this a factor explains. In the case of one-way analysis of variance, the partial eta-square is that portion of the total corrected variation that is explained by the model.
+
+$$\eta^2_{par.} =\frac{QS_{Zwischen}}{QS_{zwischen}+QS_{innerhalb}}$$
+```{r}
+library(effectsize)
+
+ANOVA <- aov(data=ALLBUS, ALLBUS$NETTO~ALLBUS$HOE_ABSCHLUSS)
+eta <- eta_squared(ANOVA, partial = TRUE)
+eta
+
+```
+## Note:  
+* Eta can be used as a stand-alone. 
+* In this example, the partial eta-square is 0.15. This means that 15% of the variation in the Income value ('compatibility') is cleared up by types of Education group.
+* "90% CI" describes the confidence interval for 90%. This is between 0.12, 0.18.
+* In other words, 15 percent of the differences between the Education type can be explained.
+
+### 9.2) Effect size
+
+Effect sizes are calculated to assess the significance of a result. In the example, although some of the mean differences are significant, the question arises as to whether they are large enough to be classified as significant.
+
+There are different ways of measuring the effect size. The best known are Cohen's effect size (d) and Pearson's correlation coefficient (r).
+
+Since R outputs the partial eta-square, this is converted here into the effect size according to Cohen (1988). In this case the effect size is always between 0 and infinite.
+
+$$f=\sqrt\frac{eta^{2}}{1-eta^{2}}$$
+```{r}
+eff <- sqrt(eta$Eta2/(1-eta$Eta2))
+sprintf("The Effect value is :  %.2f",eff)
+```
+In order to assess how big this effect is, one can orientate oneself on the classification of Cohen (1988):
+
+$$\begin{align}
+\text{Schwacher Effekt: } 0.10 &< ||f|| < 0.25             \\
+\text{Schwacher bis mittlerer Effekt: } 0.25 &= ||f||      \\
+\text{Mittlerer Effekt: } 0.25 &< ||f|| < 0.40             \\
+\text{Mittlerer bis starker Effekt: }0.40 &= ||f||         \\
+\text{Starker Effekt: } 0.40 &< ||f||        
+\end{align}$$
+
+# Note:
+* This example is very clean and somewhat “too” clear. 
+* An effect size of 0.43 corresponds to a strong effect.
+
+## 10) The Statement
+
+* The choice of Education Group has a significant influence on Income of an individual **(F (5,301.41) = 37.72, p = 2.2e-16)**. 15% of the dispersion of the Income values around the total mean can be explained by the Education group. The effect size according to **Cohen (1988) is f = 0.43 and corresponds to a strong effect**.
+
+* **Post-hoc tests with Tukey show that FIVE groups** of Education group can be formed (all p <.05): "FACHHOCHSCHULABSCHL."(M = 1908.89, SD = 843.92, n = 100) and "MEISTER, TECHNIKER" (M = 1925.39, SD = 874.90, n = 126) each form a group, and the remaining education group "HOCHSCHULABSCHLUSS" (M = 2175.40, SD = 745.28, n = 197), "KEIN ABSCHLUSS" (M = 1142.03, SD = 699.12, n = 86), "LEHRE"(M = 1518.82, SD = 596.76, n = 514), and "ANDERER ABSCHLUSS" (M = 1683.84, SD = 694.54, n = 100) each form a separate group.
+
+* **"HOCHSCHULABSCHLUSS"** Education group highly influences the Income value. 
+
+* **H0 is rejected and H1 is accepted**
+
+
+## Future Advancements:
+
+* It will be interesting to calculate the interaction value on the above formed education groups and find significant results in it.
+
+* The another important factor will be interesting to calculate statistical findings with another variable, "Zufriedenheit" with terms of Education Status, Income and Occupation on Health factors.
+
+
+```{r}
+# Notched Boxplot of Tooth Growth Against 2 Crossed Factors
+# boxes colored for ease of interpretation
+boxplot(NETTO ~ ZUFR, data=ALLBUS)
+```
+The above Boxplot, shows that the Median value of "Zufriedenheit" with respect to the Income  is more or less falling on the same level.
+
+```{r}
+h<- hist(ALLBUS$ZUFR, ylim= c(0,500), breaks = 14, col="pink",border="brown")
+#lines(frequency('Your Last Semester GPA:`))
+
+
+
+xfit <- seq(min(ALLBUS$ZUFR),max(ALLBUS$ZUFR), length= 40)
+
+yfit <- dnorm(xfit,mean=mean(ALLBUS$ZUFR),sd=sd(df$ZUFR))
+
+yfit <- yfit*diff(h$mids[1:2])*length(df$ZUFR)
+
+lines(xfit, yfit, col="blue", lwd=2)
+
+text(h$mids,h$counts,labels=h$counts, adj=c(0.5, -0.5))
+
+abline(v = mean(df$ZUFR),                       # Add line for mean
+       col = "yellow",
+       lwd = 3)
+text(x = mean(df$ZUFR) * 0.77,                   # Add text for mean
+     y = mean(df$ZUFR) * 39.7,
+     paste("Mean =", mean(df$ZUFR)),
+     col = "black",
+     )
+
+
+abline(v = median(df$ZUFR),                       # Add line for mean
+       col = "green",
+       lwd = 3)
+```
+Taken together, this Project indicates that although Education is an important aspect in one's life it may not be the essential factor for being satisfied in life.
+
+
+
+--------------------------------Thank you ----------------------------------------------------
+
+
+
+

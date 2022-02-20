@@ -1,0 +1,974 @@
+---
+title: "Assignment No.: 4 ANOVA w/o Repeated Measurement"
+output: html_notebook
+---
+
+
+```{r}
+library(readxl)
+df <- read_excel("C:/Users/Alfa/Desktop/Statistik/Abschluss_Project_Statistics/dataset/ALLBUS.xlsx")
+View(df)
+```
+
+```{r}
+### Check Missing Value
+sum(is.na(df))
+sprintf("Coun of Null Values: %d",sum(is.na(df)) )
+```
+
+```{r}
+summary(df)
+```
+
+```{r}
+dim(df)
+```
+```{r}
+hist(df$ARBEITSSTD)
+```
+```{r}
+hist(df$GRO)
+```
+
+```{r}
+hist(df$GEW)
+```
+```{r}
+hist(df$NETTO)
+```
+
+### Check for Outliers and Remove if any
+```{r}
+boxplot(df$NETTO) 
+
+outliers <- boxplot(df$NETTO, plot=FALSE)$out 
+
+print(outliers)
+
+df <- df[-which(df$NETTO %in% outliers),]
+
+boxplot(df$NETTO)
+```
+
+```{r}
+hist(df$NETTO)
+```
+```{r}
+
+boxplot(df$NETTO) # Boxplot
+# Suche der Ausreiser
+outliers <- boxplot(df$NETTO, plot=FALSE)$out 
+#Ausgabe der Ausreiser
+print(outliers)
+#Wegfilter der Ausreiser
+df <- df[-which(df$NETTO %in% outliers),]
+#Boxplot
+boxplot(df$NETTO)
+
+```
+```{r}
+h<- hist(df$NETTO, ylim = c(0, 400), col="pink",border="brown")
+#lines(frequency('Your Last Semester GPA:`))
+
+xfit <- seq(min(df$NETTO),max(df$NETTO), length= 40)
+
+yfit <- dnorm(xfit,mean=mean(df$NETTO),sd=sd(df$NETTO))
+
+yfit <- yfit*diff(h$mids[1:2])*length(df$NETTO)
+
+lines(xfit, yfit, col="blue", lwd=2)
+
+text(h$mids,h$counts,labels=h$counts, adj=c(0.5, -0.5))
+
+abline(v = mean(df$NETTO),                       # Add line for mean
+       col = "yellow",
+       lwd = 3)
+text(x = mean(df$NETTO) * 0.77,                   # Add text for mean
+     y = mean(df$NETTO) * 39.7,
+     paste("Mean =", mean(df$NETTO)),
+     col = "black",
+     )
+
+
+abline(v = median(df$NETTO),                       # Add line for mean
+       col = "green",
+       lwd = 3)
+```
+
+```{r}
+
+boxplot(df$ZUFR) # Boxplot
+# Suche der Ausreiser
+outliers <- boxplot(df$ZUFR, plot=FALSE)$out 
+#Ausgabe der Ausreiser
+print(outliers)
+#Wegfilter der Ausreiser
+df <- df[-which(df$ZUFR %in% outliers),]
+#Boxplot
+boxplot(df$ZUFR)
+
+```
+
+```{r}
+hist(df$NETTO)
+```
+```{r}
+hist(df$ZUFR, breaks = 8)
+```
+
+```{r}
+h<- hist(df$ZUFR, ylim= c(0,1200), breaks = 5, col="pink",border="brown")
+#lines(frequency('Your Last Semester GPA:`)
+xfit <- seq(min(df$ZUFR),max(df$ZUFR), length= 40)
+
+yfit <- dnorm(xfit,mean=mean(df$ZUFR),sd=sd(df$ZUFR))
+
+yfit <- yfit*diff(h$mids[1:2])*length(df$ZUFR)
+
+lines(xfit, yfit, col="blue", lwd=2)
+
+text(h$mids,h$counts,labels=h$counts, adj=c(0.5, -0.5))
+
+abline(v = mean(df$ZUFR),                       # Add line for mean
+       col = "yellow",
+       lwd = 3)
+text(x = mean(df$ZUFR) * 0.77,                   # Add text for mean
+     y = mean(df$ZUFR) * 39.7,
+     paste("Mean =", mean(df$ZUFR)),
+     col = "black",
+     )
+
+
+abline(v = median(df$ZUFR),                       # Add line for mean
+       col = "green",
+       lwd = 3)
+```
+```{r}
+shapiro.test(df$ZUFR)
+```
+
+
+```{r}
+counts <- table(df$GESCHL)
+counts
+barplot(counts)
+```
+
+
+```{r}
+counts <- table(df$SCHULABSCHLUSS)
+barplot(counts)
+
+```
+
+
+```{r}
+counts <- table(df$HOE_ABSCHLUSS)
+barplot(counts)
+
+```
+
+```{r}
+counts <- table(df$BERUFSTAETIG)
+barplot(counts)
+
+```
+
+
+```{r}
+counts <- table(df$ARBEITSSTD)
+barplot(counts)
+
+```
+
+
+```{r}
+hist(df$ARZTBES)
+```
+
+```{r}
+
+boxplot(df$ARZTBES) # Boxplot
+# Suche der Ausreiser
+outliers <- boxplot(df$ARZTBES, plot=FALSE)$out 
+#Ausgabe der Ausreiser
+print(outliers)
+#Wegfilter der Ausreiser
+df <- df[-which(df$ARZTBES %in% outliers),]
+#Boxplot
+#boxplot(df$ARZTBES)
+
+```
+```{r}
+hist(df$ARZTBES, breaks = 5)
+
+shapiro.test(df$ARZTBES)
+```
+
+
+```{r}
+hist(df$ARBEITSSTD)
+
+```
+
+
+
+
+
+```{r}
+counts <- table(df$RAUCH)
+barplot(counts)
+
+```
+
+```{r}
+df2 <- df
+View(df2)
+```
+
+
+-----------------------------------------------------------------------------------------------------------------------------
+**************************** Test1 : Hypotheses for Pearson test *********************************************************
+------------------------------------------------------------------------------------------------------------------------------
+
+
+# Hypotheses
+
+H1: There is a significant relationship between Arbetisstunde and Arztbesuch oder 
+
+Zufriedenheit  oder Netto <br>
+
+
+H0: There is NO significant relationship relationship between Arbetisstunde and Zufriedenheit
+
+# Requirements
+The variables are at least interval scaled -> Arbetisstunde and Zufriedenheit
+
+The variables are normally distributed (n> 30) -> need to confirm thru histogram / qqplot 
+
+The examined relationship between the variables must be linear -> need to confirm thru scatter plot
+
+
+# Basic Concepts: What is Pearson?
+
+The correlation describes the relationship between two interval-scaled characteristics / variables of a random sample. The strength of the relationship can be calculated using the Bravais and Pearson correlation coefficient r. The variables are independent of each other and consequently no causal statements are made. 
+
+
+# Descriptive statistics
+
+```{r}
+library(psych)
+psych :: describe.by (df2$ARBEITSSTD)
+psych :: describe.by (df2$ZUFR)
+```
+
+The Average Depression Score of Student is 1.98 (SD = 0.75, n = 351). The Average GPA Score of Students is 3.01 (SD = 0.76, n = 351).
+
+
+# Confirm Normal Distribution with Histograms
+
+Histogram for Depression Score:
+
+see above
+
+
+# qqplot 
+```{r}
+library(ggplot2)
+ggplot(df2, aes(x = ARBEITSSTD, y =df$NETTO )) + geom_point(size = 3) + geom_smooth(method = "lm", col = "red")
+
+
+ggplot(df2, aes(x = ARBEITSSTD, y =ARZTBES )) + geom_point(size = 3) + geom_smooth(method = "lm", col = "red")
+
+
+ggplot(df2, aes(x = ARBEITSSTD, y =ZUFR )) + geom_point(size = 3) + geom_smooth(method = "lm", col = "red")
+
+```
+
+
+# Scatterplot
+
+A scatter plot, also known as a scatter plot, is the graphical representation of observed value pairs of two statistical features. These pairs of values ​​are entered in a Cartesian coordinate system, resulting in a point cloud.
+
+
+```{r}
+library(car)
+scatterplot(df2$ARBEITSSTD  ~ df2$NETTO , main = "Scatterplot between Depression score and GPA score")
+
+
+scatterplot(df2$ARBEITSSTD  ~ df2$ARZTBES , main = "Scatterplot between Depression score and GPA score")
+
+
+scatterplot(df2$ARBEITSSTD  ~ df2$ZUFR , main = "Scatterplot between Depression score and GPA score")
+
+```
+
+
+```{r}
+model1 <- lm(ARBEITSSTD~ NETTO, data = df2)
+
+model2 <- lm(ARBEITSSTD~ ARZTBES, data = df2)
+
+model3 <- lm(ARBEITSSTD~ ZUFR, data = df2)
+
+```
+
+
+```{r}
+plot(model1,2)
+
+plot(model2,2)
+
+plot(model3,2)
+
+```
+
+
+```{r}
+library(psych)
+describe(df2)
+```
+
+
+
+
+
+```{r}
+test1 <- cor.test(df2$ARZTBES, df2$ARBEITSSTD)
+test1
+```
+
+Null hypothesis is discarded and there is a significant negative correlation between Arbeitstunde and Arztbesuch
+
+Absolute value of 0.09 is 0.1, there is a significant relation but very low.and so it is safe to accept Null hypothesis.
+
+```{r}
+test2 <- cor.test(df2$ZUFR, df2$ARBEITSSTD)
+test2
+```
+
+
+
+Null hypothesis is accepted and there is no correlation between Arbeitstunde and Zufriedenheit
+
+
+```{r}
+test3 <- cor.test(df2$NETTO, df2$ARBEITSSTD)
+test3
+```
+
+Null hypothesis is discarded and there is a significant correlation between Arbeitstunde and Nettpo income
+
+
+#Bestimmtheitsmaß
+```{r}
+rbestimmt <- test1$estimate^2*100
+sprintf("Das Bestimmtheitsmaß liegt bei %.2f Prozent.", rbestimmt)
+```
+```{r}
+rbestimmt <- test2$estimate^2*100
+sprintf("Das Bestimmtheitsmaß liegt bei %.2f Prozent.", rbestimmt)
+```
+
+```{r}
+rbestimmt <- test3$estimate^2*100
+sprintf("Das Bestimmtheitsmaß liegt bei %.2f Prozent.", rbestimmt)
+```
+
+
+# effect starke
+```{r}
+sprintf("Die Effektstärke liegt bei %.4f.",test2$estimate)
+```
+```{r}
+sprintf("Die Effektstärke liegt bei %.4f.",test3$estimate)
+```
+
+```{r}
+sprintf("Die Effektstärke liegt bei %.4f.",test1$estimate)
+```
+
+
+------------------------------------------------------------------------------------------------------------
+ **************************** Test 2: Hypothesis for t-test ****************************************************
+------------------------------------------------------------------------------------------------------------
+
+Hypotheses: there is a significant difference between sex(Female employees / Male employees) response to Arbeitstunde.
+
+Independent t-test:
+
+
+```{r}
+
+# histogram
+
+
+library(dplyr)
+library(ggplot2)
+
+  df2 %>%
+  group_by(GESCHL) %>%
+  ggplot(aes(df$ARBEITSSTD)) + 
+    geom_histogram(binwidth = 20, aes(fill=GESCHL), color="#e9ecef", alpha=0.7 ) + # Erstelle ein Histogramm, Unterteilung, Farbe + Transparenz
+   facet_wrap(~GESCHL)+ # Zwei Graphen
+    theme_classic()+ #Farbschema
+    labs(x="Gruppierungen", y="Anzahl") # Beschriftung
+```
+```{r}
+
+#descriptive
+
+
+#library(dplyr)
+df2 %>%
+group_by(GESCHL) %>%
+  summarize(Anzahl = n(), Mittelwert = mean(ARBEITSSTD), Median = median(ARBEITSSTD), Standardabweichung = sd(ARBEITSSTD)) %>%
+  mutate_if(is.numeric, round, 2)
+```
+
+
+```{r}
+# levene test
+
+
+library(car)
+leveneTest(df2$ARBEITSSTD, df2$GESCHL, center = mean)
+```
+the pvalue is 0.00 and hence it is heteroginitat and proceed with correction.
+
+Mit Welch-Korrektur: p < 0.05 => Ergebnis Signifikant –> Varianzen heterogen
+
+Ohne Welch-Korrektur: p > 0.05 => Ergebnis nicht Signifikant –> Varianzen homogen –> H0 mit Annahme Var1=Var2
+
+
+## 6) Ergebnisse des t-Tests für unabhängige Stichproben (Variant 1:Ohne Welch-Korrektur)
+
+```{r}
+##ungerichtete Hypothese
+test1<- t.test(df2$ARBEITSSTD ~ df2$GESCHL, var.eq = TRUE, con= 0.95, alt = "two.sided")
+test1
+```
+### (Variant 2:Welch-Korrektur)
+
+```{r}
+##ungerichtete Hypothese
+test2<- t.test(df2$ARBEITSSTD ~ df2$GESCHL, var.eq = FALSE, con= 0.95, alt = "two.sided")
+test2
+```
+
+The test statistic is t = 14.838 and the associated significance value is p = 2.2e-16. So the difference is significant:
+The mean values of the Arbeitstunde for Gender ( Male and Female) differs (t () =  14.838, p = 2.2e-16, n = )
+
+
+## 7)	Berechnung der Effektstärke
+
+### Bei ungleichgroßen Gruppen
+df2$ARBEITSSTD ~ df2$GESCHL
+$$d = (\frac {n1+n2}{n1*n2}+ 0.5*d^2/df) * (\frac{(n1+n2}{df})$$
+```{r}
+
+effsize::cohen.d(d = df2$ARBEITSSTD, f= df2$GESCHL)
+```
+Interpretation von d nach Cohen (1988):
+$$
+\begin{align}
+\text{Schwacher Effekt: } 0.20 &< ||d|| < 0.50             \\
+\text{Schwacher bis mittlerer Effekt: } 0.50 &= ||d||      \\
+\text{Mittlerer Effekt: } 0.50 &< ||d|| < 0.80             \\
+\text{Mittlerer bis starker Effekt: }0.80 &= ||d||         \\
+\text{Starker Effekt: } 0.80 &< ||d||        
+\end{align}
+$$
+
+There is a good effect value of 92% , which is large.
+
+
+## 8)	Eine Aussage
+
+Male population show significantly more number of working hours (M =  SD = , n = ) than female pouplation(M =  SD = , n = ) (t (355) =  -5.4608, p = 5.614e-07, n = 357). The |effect size| is r = 0.92 and thus corresponds to a large effect size according to Cohen (1992). H0 can be discarded.
+
+
+
+
+-----------------------------------------------------------------------------------------------------------------------------
+ **************************** Test 3: t-test for dependent samples: ****************************************************
+-----------------------------------------------------------------------------------------------------------------------------
+
+
+Hypotheses: there is a significant 
+
+t-test for dependent samples: with zwei asprägung ( It is difficult locating the varaibles in our present dataset)
+
+```{r}
+df2[duplicated(df2$ID),]
+dim(df2[duplicated(df2$ID),])[1]
+```
+
+
+
+------------------------------------------------------------------------------------------------------------
+ **************************** Test 4: One way Anova w/O repeated measurement ****************************************************
+------------------------------------------------------------------------------------------------------------
+
+1) Hypothesis: There is a mean difference in Arztbesuch or zufriedenheit between Working statuses (Full time, Part time, Not working)
+
+
+2) Prerequisites for one-way analysis of variance without repetition of measurements
+
+✓ The dependent variable is interval-scaled ->  1.) Arztebesuch oder 2.) Zufriedenheit Value is ordinal scaled through (likert way)
+ 
+✓ The independent variable (Working status) is categorical, Working statuses (Full time, Part time, Not working)
+
+✓ The groups formed by the factor are independent.
+
+✓ The dependent variable is normally distributed within each of the groups
+
+✓ Homogeneity of the variances: The groups come from populations with
+approximately identical variances of the dependent variables -> confirm through Levene test
+
+
+ 3) Basic Concepts: The basic idea of ​​the analysis of variance
+
+The one-way analysis of variance - also "one-way ANOVA", since "Analysis of Variance" in English - tests whether the means of several independent groups (or samples), which are defined by a categorical independent variable, differ. This categorical independent variable is called the "factor" in the context of analysis of variance. Correspondingly, the characteristics of the independent variable are called “factor levels”, with the term “treatments” also being used. An analysis of variance is referred to as "one-way" if it only uses one factor, i.e. a grouping variable, multi-factor analysis of variance). 
+
+
+-----------------------------------------------------------------------------------------------------------
+## 4)	Boxplots 
+-----------------------------------------------------------------------------------------------------------
+
+```{r}
+boxplot(df2$NETTO ~ df2$HOE_ABSCHLUSS, main = "Boxplots zum Vergleich", ylab = "Tolerance Value", xlab= "Music_Style" , col = c("lightgreen", "deepskyblue","tomato", "orange"))
+
+```
+
+
+```{r}
+ggplot(data = df2, aes(x = HOE_ABSCHLUSS, y = NETTO)) +
+geom_boxplot(
+fill = c("blue", "red","green", "pink", "yellow", "orange"),
+outlier.color = NULL
+) +
+theme_classic() +
+theme(legend.position = "none")
+```
+
+Boxplot shows no outliers. However, The Median value of Elektro and Pop overlap  each other and shows a correlation.
+
+-----------------------------------------------------------------------------------------------------------
+## 5)	Normalverteilung
+-----------------------------------------------------------------------------------------------------------
+Um einen ersten Überblick über die Daten zu gewinnen, empfiehlt es sich Histogrammm zu erstellen.
+
+
+
+```{r}
+df2 %>%
+  group_by(HOE_ABSCHLUSS) %>%
+  ggplot(aes(NETTO, color=HOE_ABSCHLUSS)) + 
+  geom_histogram(aes(fill = HOE_ABSCHLUSS), bins = 9) +
+  facet_wrap(~HOE_ABSCHLUSS) +
+  theme_grey()+
+  labs(x= "Vertraeglichkeit",y = "Music style" )
+```
+### Alternativ QQPlot
+
+
+
+
+```{r}
+library(car)
+
+qqPlot(NETTO ~ HOE_ABSCHLUSS, data=df2, 
+       layout=c(2, 3))
+
+```
+
+-----------------------------------------------------------------------------------------------------------
+#6.) levene Test
+-----------------------------------------------------------------------------------------------------------
+
+```{r}
+leveneTest(df2$NETTO ~ df2$HOE_ABSCHLUSS, center="mean")
+```
+In the present example, the Levene test is significant (F (3,259) = 13.936, p = 1.883e-08), so that heterogeneity of variance can be assumed. That means - a Welch correction must be carried out.
+
+** With Welch correction: p <0.05 => result significant -> variances heterogeneous **
+
+** Without Welch correction: p> 0.05 => result not significant -> variances homogeneous -> H0 with assumption Var1 = Var2 = ... -> Var_n is assumed **
+
+-----------------------------------------------------------------------------------------------------------
+## 7) Descriptive Statistics
+-----------------------------------------------------------------------------------------------------------
+
+The table in figure shows the mean values, standard deviations and sizes of all four Musical groups. This information is used for reporting.
+
+```{r}
+# sollte ein Meldung zum Thema "summarise" erscheinen - tauschen Sie s mit z oder anderes rum 
+df2 %>%
+group_by(HOE_ABSCHLUSS) %>%
+  dplyr::summarise(Anzahl = n(),  Mittelwert = mean(NETTO), Median = median(NETTO), Standardabweichung = sd(NETTO)) %>%
+  mutate_if(is.numeric, round, 2)
+```
+There is a mean difference between the groups, however there is NO large  difference of MEAN between the Musical group (Elektro vs Pop). 
+
+Metal Musical group (M = 4.27, SD = 0.82, n = 64) shows the best Tolerance value, followed by 
+Elektro (M 2.80, SD = 0.79, n = 54), POP (M 2.86, SD = 0.82, n = 59) and the least Jazz (M 1.03, SD = 0.71, n = 86).
+
+As could already be seen in the box plot, the mean values doesnot differ between Elektro and POP, and the rest differ from each other.
+
+-----------------------------------------------------------------------------------------------------------
+## 8) Results of the one-way analysis of variance
+-----------------------------------------------------------------------------------------------------------
+
+## model
+The model is used in the post-hoc as well as in the Eta ^ 2.
+
+```{r}
+ANOVA <- aov (data = df2, df2$NETTO ~ df2$HOE_ABSCHLUSS) #Model formed
+ANOVA
+```
+
+### with Welch correction
+
+```{r}
+ANOVAmitWelch <- oneway.test (df2$NETTO ~ df2$HOE_ABSCHLUSS)
+ANOVAmitWelch
+```
+
+The overall model has become significant (F (3,131.04) = 221.33, p = 2.2e-16). However, based on this test, it cannot be determined which of the FOUR groups differ significantly from one another. It is conceivable that only one pair differs significantly and that there are no significant differences between the others. A post-hoc test is therefore carried out.
+
+
+### without Welch correction
+
+```{r}
+summary(ANOVAmitWelch)
+summary(ANOVA)
+```
+
+
+
+
+
+-----------------------------------------------------------------------------------------------------------
+## 9) Post hoc testing
+-----------------------------------------------------------------------------------------------------------
+
+Although the F test shows that there is a main effect of relationship types on savings rates, post-hoc tests must be used to clarify between which factor levels (relationship status) there are significant differences in terms of savings rates.
+
+$$ \ frac {k \ cdot (k-1)} {2} = \ frac {3 \ cdot (3-1)} {2} = \ frac {6} {2} = 3 $$
+With
+
+$ k $ = characteristics / groups / levels
+
+
+When calculating post-hoc tests, a t test is in principle carried out for every combination of two mean values. In the current example with three groups, there are 3 tests. However, multiple tests are problematic because the alpha error (the false rejection of the null hypothesis) increases with the number of comparisons.
+
+If only one t-test with a significance level of .05 is carried out, the probability that the alpha error will not occur is 95 percent. However, if three such pair comparisons are made, the probability of the alpha error not occurring is (.95) ^ 3 = 0.857375. To determine the probability of occurrence of the alpha error, 1 - 0.857375 = 0.142625 is calculated. The probability of the occurrence of the alpha error is thus
+at 14.26 percent. This probability of error is known as the Familywise Error Rate.
+
+The turkey, for example, can be used to remedy this problem.
+RStudio takes the new level into account, so we can continue testing at 0.05.
+
+# Tukey test
+
+
+```{r}
+TUKEY<- TukeyHSD(aov(data=df2, df2$NETTO ~ df2$HOE_ABSCHLUSS))
+TUKEY
+```
+# Q1.) whether there is a difference in compatibility between the musical styles "jazz", "pop", "electro" and "metal".
+
+Answer: There is a compatibility or co-relation between group Elektro and Pop as we have to accept the Null Hypotheses and the alternate Hypothesis must be discarded. Pop-Elektro (pvalue- 0.9762803).
+
+And the other Music groups doesnot accept the alternative hypotheses and NULL Hypothesis is discarded.
+
+
+## 9)	Profildiagramm
+
+```{r}
+library(ggplot2)
+ggplot(df2, aes(x=HOE_ABSCHLUSS, y=NETTO, group=1))+
+  stat_summary(fun.y = mean, geom="point", size=3)+
+  stat_summary(fun.y = mean, geom="line")+
+  stat_summary(fun.data = mean_cl_normal, geom="errorbar",width=.2, size=.25)+
+  labs(x="Mutterjob", y="Abschlussnote")+
+  theme_classic()
+```
+
+
+
+
+```{r}
+plot(TUKEY , col="red",las = 1, cex.axis = 0.8)
+```
+```{r}
+View(TUKEY)
+```
+
+
+
+# Q2.) The higher the tolerance value, the more "cooperative", "more harmonious" a person is.
+
+
+```{r}
+library(multcompView)
+generate_label_df <- function(TUKEY, variable){
+     Tukey.levels <- TUKEY[[variable]][,4]
+     Tukey.labels <- data.frame(multcompLetters(Tukey.levels)['Letters'])
+     Tukey.labels$music_tol=rownames(Tukey.labels)
+     Tukey.labels=Tukey.labels[order(Tukey.labels$music_tol) , ]
+     return(Tukey.labels)
+}
+ 
+LABELS <- generate_label_df(TUKEY , "df2$HOE_ABSCHLUSS")
+
+table(LABELS)
+```
+
+The Elektro and Pop group can be grouped together.
+
+df2$NETTO ~ df2$HOE_ABSCHLUSS
+#music <-replace(music, 2,'Elektro-Pop')
+```{r}
+df2$HOE_ABSCHLUSS_New <- df2$HOE_ABSCHLUSS 
+```
+
+```{r}
+music$Musikstil_New=str_replace(music$Musikstil_New,"Elektro","Elektro-pop")
+```
+
+```{r}
+music$Musikstil_New=str_replace(music$Musikstil_New,"Pop","Elektro-pop")
+```
+
+```{r}
+View(music)
+```
+
+
+
+
+
+
+
+
+----------------------------------------------------------------------------------------------------
+other 
+----------------------------------------------------------------------------------------------------
+
+```{r}
+boxplot(df2$GEBJAHR ~ df2$HOE_ABSCHLUSS, main = "Boxplots zum Vergleich", ylab = "Tolerance Value", xlab= "Music_Style" , col = c("lightgreen", "deepskyblue","tomato", "orange"))
+
+```
+```{r}
+boxplot(df$NETTO ~ df2$ZUFR, main = "Boxplots zum Vergleich", ylab = "Tolerance Value", xlab= "Music_Style" , col = c("lightgreen", "deepskyblue","tomato", "orange"))
+
+```
+
+```{r}
+ggplot(data = df2, aes(x = HOE_ABSCHLUSS, y = df2$GEBJAHR)) +
+geom_boxplot(
+fill = c("blue", "red","green", "pink", "yellow", "orange"),
+outlier.color = NULL
+) +
+theme_classic() +
+theme(legend.position = "none")
+```
+
+Boxplot shows no outliers. However, The Median value of Elektro and Pop overlap  each other and shows a correlation.
+
+-----------------------------------------------------------------------------------------------------------
+## 5)	Normalverteilung
+-----------------------------------------------------------------------------------------------------------
+Um einen ersten Überblick über die Daten zu gewinnen, empfiehlt es sich Histogrammm zu erstellen.
+
+
+
+```{r}
+df2 %>%
+  group_by(HOE_ABSCHLUSS) %>%
+  ggplot(aes(GEBJAHR, color=HOE_ABSCHLUSS)) + 
+  geom_histogram(aes(fill = HOE_ABSCHLUSS), bins = 9) +
+  facet_wrap(~HOE_ABSCHLUSS) +
+  theme_grey()+
+  labs(x= "Vertraeglichkeit",y = "Music style" )
+```
+### Alternativ QQPlot
+
+
+
+
+```{r}
+library(car)
+
+qqPlot(GEBJAHR ~ HOE_ABSCHLUSS, data=df2, 
+       layout=c(2, 3))
+
+```
+
+-----------------------------------------------------------------------------------------------------------
+#6.) levene Test
+-----------------------------------------------------------------------------------------------------------
+
+```{r}
+leveneTest(df2$GEBJAHR ~ df2$HOE_ABSCHLUSS, center="mean")
+```
+In the present example, the Levene test is significant (F (3,259) = 13.936, p = 1.883e-08), so that heterogeneity of variance can be assumed. That means - a Welch correction must be carried out.
+
+** With Welch correction: p <0.05 => result significant -> variances heterogeneous **
+
+** Without Welch correction: p> 0.05 => result not significant -> variances homogeneous -> H0 with assumption Var1 = Var2 = ... -> Var_n is assumed **
+
+-----------------------------------------------------------------------------------------------------------
+## 7) Descriptive Statistics
+-----------------------------------------------------------------------------------------------------------
+
+The table in figure shows the mean values, standard deviations and sizes of all four Musical groups. This information is used for reporting.
+
+```{r}
+# sollte ein Meldung zum Thema "summarise" erscheinen - tauschen Sie s mit z oder anderes rum 
+df2 %>%
+group_by(HOE_ABSCHLUSS) %>%
+  dplyr::summarise(Anzahl = n(),  Mittelwert = mean(GEBJAHR), Median = median(GEBJAHR), Standardabweichung = sd(GEBJAHR)) %>%
+  mutate_if(is.numeric, round, 2)
+```
+There is a mean difference between the groups, however there is NO large  difference of MEAN between the Musical group (Elektro vs Pop). 
+
+Metal Musical group (M = 4.27, SD = 0.82, n = 64) shows the best Tolerance value, followed by 
+Elektro (M 2.80, SD = 0.79, n = 54), POP (M 2.86, SD = 0.82, n = 59) and the least Jazz (M 1.03, SD = 0.71, n = 86).
+
+As could already be seen in the box plot, the mean values doesnot differ between Elektro and POP, and the rest differ from each other.
+
+-----------------------------------------------------------------------------------------------------------
+## 8) Results of the one-way analysis of variance
+-----------------------------------------------------------------------------------------------------------
+
+## model
+The model is used in the post-hoc as well as in the Eta ^ 2.
+
+```{r}
+ANOVA <- aov (data = df2, df2$NETTO ~ df2$HOE_ABSCHLUSS) #Model formed
+ANOVA
+```
+
+### with Welch correction
+
+```{r}
+ANOVAmitWelch <- oneway.test (df2$NETTO ~ df2$HOE_ABSCHLUSS)
+ANOVAmitWelch
+```
+
+The overall model has become significant (F (3,131.04) = 221.33, p = 2.2e-16). However, based on this test, it cannot be determined which of the FOUR groups differ significantly from one another. It is conceivable that only one pair differs significantly and that there are no significant differences between the others. A post-hoc test is therefore carried out.
+
+
+### without Welch correction
+
+```{r}
+summary(ANOVAmitWelch)
+summary(ANOVA)
+```
+
+
+
+
+
+-----------------------------------------------------------------------------------------------------------
+## 9) Post hoc testing
+-----------------------------------------------------------------------------------------------------------
+
+Although the F test shows that there is a main effect of relationship types on savings rates, post-hoc tests must be used to clarify between which factor levels (relationship status) there are significant differences in terms of savings rates.
+
+$$ \ frac {k \ cdot (k-1)} {2} = \ frac {3 \ cdot (3-1)} {2} = \ frac {6} {2} = 3 $$
+With
+
+$ k $ = characteristics / groups / levels
+
+
+When calculating post-hoc tests, a t test is in principle carried out for every combination of two mean values. In the current example with three groups, there are 3 tests. However, multiple tests are problematic because the alpha error (the false rejection of the null hypothesis) increases with the number of comparisons.
+
+If only one t-test with a significance level of .05 is carried out, the probability that the alpha error will not occur is 95 percent. However, if three such pair comparisons are made, the probability of the alpha error not occurring is (.95) ^ 3 = 0.857375. To determine the probability of occurrence of the alpha error, 1 - 0.857375 = 0.142625 is calculated. The probability of the occurrence of the alpha error is thus
+at 14.26 percent. This probability of error is known as the Familywise Error Rate.
+
+The turkey, for example, can be used to remedy this problem.
+RStudio takes the new level into account, so we can continue testing at 0.05.
+
+# Tukey test
+
+
+```{r}
+TUKEY<- TukeyHSD(aov(data=df2, df2$NETTO ~ df2$HOE_ABSCHLUSS))
+TUKEY
+```
+# Q1.) whether there is a difference in compatibility between the musical styles "jazz", "pop", "electro" and "metal".
+
+Answer: There is a compatibility or co-relation between group Elektro and Pop as we have to accept the Null Hypotheses and the alternate Hypothesis must be discarded. Pop-Elektro (pvalue- 0.9762803).
+
+And the other Music groups doesnot accept the alternative hypotheses and NULL Hypothesis is discarded.
+
+
+## 9)	Profildiagramm
+
+```{r}
+library(ggplot2)
+ggplot(df2, aes(x=HOE_ABSCHLUSS, y=NETTO, group=1))+
+  stat_summary(fun.y = mean, geom="point", size=3)+
+  stat_summary(fun.y = mean, geom="line")+
+  stat_summary(fun.data = mean_cl_normal, geom="errorbar",width=.2, size=.25)+
+  labs(x="Mutterjob", y="Abschlussnote")+
+  theme_classic()
+```
+
+
+
+
+```{r}
+plot(TUKEY , col="red",las = 1, cex.axis = 0.8)
+```
+```{r}
+View(TUKEY)
+```
+
+
+
+# Q2.) The higher the tolerance value, the more "cooperative", "more harmonious" a person is.
+
+
+```{r}
+library(multcompView)
+generate_label_df <- function(TUKEY, variable){
+     Tukey.levels <- TUKEY[[variable]][,4]
+     Tukey.labels <- data.frame(multcompLetters(Tukey.levels)['Letters'])
+     Tukey.labels$music_tol=rownames(Tukey.labels)
+     Tukey.labels=Tukey.labels[order(Tukey.labels$music_tol) , ]
+     return(Tukey.labels)
+}
+ 
+LABELS <- generate_label_df(TUKEY , "df2$HOE_ABSCHLUSS")
+
+table(LABELS)
+```
+
+The Elektro and Pop group can be grouped together.
+
+df2$NETTO ~ df2$HOE_ABSCHLUSS
+#music <-replace(music, 2,'Elektro-Pop')
+```{r}
+df2$HOE_ABSCHLUSS_New <- df2$HOE_ABSCHLUSS 
+```
+
+```{r}
+music$Musikstil_New=str_replace(music$Musikstil_New,"Elektro","Elektro-pop")
+```
+
+```{r}
+music$Musikstil_New=str_replace(music$Musikstil_New,"Pop","Elektro-pop")
+```
+
+```{r}
+View(music)
+```
+
+
+
+
+

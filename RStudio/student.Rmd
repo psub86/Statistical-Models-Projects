@@ -1,0 +1,441 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+student <- read.csv("C:/Users/Alfa/Desktop/Statistik/student.csv")
+View(student)
+```
+
+
+## Explanation of Columns
+
+Pstatus
+Parent's cohabitation status (binary: 'T' - living together or 'A' - living apart)
+
+famsize
+Family size (binary: 'LE3' - less or equal to 3 or 'GT3' - greater than 3)
+
+Medu
+Mother's education (numeric: 0 - none, 1 - primary education (4th grade), 2 - 5th to 9th grade, 3 - secondary education, or 4 - higher education)
+
+Fedu
+Father's education (numeric: 0 - none, 1 - primary education (4th grade), 2 - 5th to 9th grade, 3 - secondary education, or 4 - higher education)
+
+Mjob
+Mother's job (nominal: 'teacher', 'health' care related, civil 'services' (e.g. administrative or police), 'at_home' or 'other')
+
+Fjob
+Father's job (nominal: 'teacher', 'health' care related, civil 'services' (e.g. administrative or police), 'at_home' or 'other')
+
+G1
+First period grade (numeric: from 0 to 20)
+
+G2
+Second period grade (numeric: from 0 to 20)
+
+G3
+Final grade (numeric: from 0 to 20, output target)
+
+
+
+
+```{r}
+hist(student$G1, xlab = "First Semester Noten", ylab= "Anzahl", main ="Histogramm der First Semester Noten", breaks = 7,  col = "skyblue")
+
+```
+
+
+```{r}
+hist(student$G2, xlab = "Second Semester Noten", ylab= "Anzahl", main ="Histogramm der First Semester Noten", breaks = 7,  col = "skyblue")
+
+```
+
+```{r}
+hist(student$G3, xlab = "Final Semester Noten", ylab= "Anzahl", main ="Histogramm der First Semester Noten", breaks = 7,  col = "skyblue")
+
+```
+
+
+
+```{r}
+hist(student$age, xlab = "Age", ylab= "Anzahl", main ="Histogramm of A", breaks = 7,  col = "skyblue")
+
+```
+
+```{r}
+hist(student$Medu, xlab = "Education of Mother", ylab= "Anzahl", main ="Histogramm of Mother Education", breaks = 7,  col = "skyblue")
+
+```
+
+```{r}
+hist(student$Fedu, xlab = "Education of Father", ylab= "Anzahl", main ="Histogramm of Father Education", breaks = 6,  col = "skyblue")
+
+```
+```{r}
+hist(student$freetime, xlab = "Freetime", ylab= "Anzahl", main ="Histogramm of Freetime", breaks = 5,  col = "skyblue")
+
+```
+```{r}
+hist(student$studytime, xlab = "Study Time", ylab= "Anzahl", main ="Histogramm of Studytimes", breaks = 4     ,  col = "skyblue")
+
+```
+
+
+```{r}
+plot(student$G3 ~ student$studytime, main = "Streudiagramm zwischen Final Grade and Studytime", xlab = "Final Grade", ylab= "")
+abline(lm(student$G3 ~ student$studytime, data =student), col="tomato")
+
+```
+
+```{r}
+test <- cor.test(student$G3, student$studytime)
+test
+```
+
+
+```{r}
+plot(student$G1 ~ student$G3, main = "Streudiagramm zwischen Final Grade and Studytime", xlab = "First Grade vs Final Grade", ylab= "")
+abline(lm(student$G1 ~ student$G3, data =student), col="tomato")
+
+```
+
+```{r}
+test1 <- cor.test(student$G3, student$G1)
+test1
+
+
+
+```
+
+
+
+```{r}
+test2 <- cor.test(student$G3, student$Fedu)
+test2
+```
+```{r}
+test3 <- cor.test(student$G3, student$Medu)
+test3
+```
+
+
+```{r}
+test4 <- cor.test(student$Fedu, student$Medu)
+test4
+```
+
+```{r}
+plot(student$G3 ~ student$studytime, main = "", xlab = "Study Time", ylab= "Final Grade")
+abline(lm(student$G3 ~ student$studytime, data = student), col="tomato")
+```
+
+```{r}
+plot(student$G3 ~ student$Medu, main = "", xlab = "First Grade", ylab= "Final Grade")
+abline(lm(student$G3 ~ student$G1, data = student), col="tomato")
+```
+
+
+```{r}
+plot(student$G3 ~ student$Fedu, main = "", xlab = "Father Education", ylab= "Final Grade")
+abline(lm(student$G3 ~ student$Fedu, data = student), col="tomato")
+```
+
+
+# T Test für unabhängige Stichproben
+
+
+## 4) Deskriptive Statistiken
+
+```{r}
+library(dplyr)
+student %>%
+group_by(internet) %>%
+  summarize(Anzahl = n(), Mittelwert = mean(G3), Median = median(G3), Standardabweichung = sd(G3)) %>%
+  mutate_if(is.numeric, round, 2)
+```
+
+### Internet
+
+```{r}
+library(car)
+
+leveneTest(student$G3, student$internet, center = mean)
+```
+
+Mit Welch-Korrektur: p < 0.05 => Ergebnis Signifikant –> Varianzen heterogen
+
+Ohne Welch-Korrektur: p > 0.05 => Ergebnis nicht Signifikant –> Varianzen homogen –> H0 mit Annahme Var1=Var2
+
+## 6) Ergebnisse des t-Tests für unabhängige Stichproben (Variant 1:Ohne Welch-Korrektur)
+
+```{r}
+##ungerichtete Hypothese
+test1<- t.test(student$G3~student$internet, var.eq = TRUE, con= 0.95, alt = "two.sided")
+test1
+```
+
+### Activities
+
+```{r}
+library(car)
+
+leveneTest(student$G3, student$activities, center = mean)
+```
+
+Mit Welch-Korrektur: p < 0.05 => Ergebnis Signifikant –> Varianzen heterogen
+
+Ohne Welch-Korrektur: p > 0.05 => Ergebnis nicht Signifikant –> Varianzen homogen –> H0 mit Annahme Var1=Var2
+
+## 6) Ergebnisse des t-Tests für unabhängige Stichproben (Variant 1:Ohne Welch-Korrektur)
+
+```{r}
+##ungerichtete Hypothese
+test1<- t.test(student$G3~student$activities, var.eq = TRUE, con= 0.95, alt = "two.sided")
+test1
+```
+
+### Guardian
+
+```{r}
+library(car)
+
+leveneTest(student$G3, student$guardian, center = mean)
+```
+
+Mit Welch-Korrektur: p < 0.05 => Ergebnis Signifikant –> Varianzen heterogen
+
+Ohne Welch-Korrektur: p > 0.05 => Ergebnis nicht Signifikant –> Varianzen homogen –> H0 mit Annahme Var1=Var2
+
+## 6) Ergebnisse des t-Tests für unabhängige Stichproben (Variant 1:Ohne Welch-Korrektur)
+
+```{r}
+##ungerichtete Hypothese
+test1<- t.test(student$G3~student$guardian, var.eq = TRUE, con= 0.95, alt = "two.sided")
+test1
+```
+We can't do this test. 
+
+### Paid
+
+```{r}
+library(car)
+
+leveneTest(student$G3, student$paid, center = mean)
+```
+
+Mit Welch-Korrektur: p < 0.05 => Ergebnis Signifikant –> Varianzen heterogen
+
+Ohne Welch-Korrektur: p > 0.05 => Ergebnis nicht Signifikant –> Varianzen homogen –> H0 mit Annahme Var1=Var2
+
+
+
+
+## 6) Ergebnisse des t-Tests für unabhängige Stichproben (Variant 1:Ohne Welch-Korrektur)
+
+```{r}
+##ungerichtete Hypothese
+test1<- t.test(student$G3~student$paid, var.eq = TRUE, con= 0.95, alt = "two.sided")
+test1
+```
+
+## 6) (Variant 2:Welch-Korrektur)
+
+```{r}
+##ungerichtete Hypothese
+test1<- t.test(student$G3~student$paid, var.eq = FALSE, con= 0.95, alt = "two.sided")
+test1
+```
+
+### GENDER
+
+```{r}
+library(car)
+
+leveneTest(student$G3, student$sex, center = mean)
+```
+
+Mit Welch-Korrektur: p < 0.05 => Ergebnis Signifikant –> Varianzen heterogen
+
+Ohne Welch-Korrektur: p > 0.05 => Ergebnis nicht Signifikant –> Varianzen homogen –> H0 mit Annahme Var1=Var2
+
+## 6) Ergebnisse des t-Tests für unabhängige Stichproben (Variant 1:Ohne Welch-Korrektur)
+
+```{r}
+##ungerichtete Hypothese
+test1<- t.test(student$G3~student$sex, var.eq = TRUE, con= 0.95, alt = "two.sided")
+test1
+```
+### (Variant 2:Welch-Korrektur)
+
+```{r}
+##ungerichtete Hypothese
+test1<- t.test(student$G3~student$sex, var.eq = FALSE, con= 0.95, alt = "two.sided")
+test1
+```
+# T Test für abhängige Stichproben
+
+# Differenz erstellen
+
+```{r}
+zwischen <- student$G1 - student$G2 
+zwischen
+```
+```{r}
+zwischen1 <- student$G1 - student$G3 
+zwischen1
+```
+
+```{r}
+hist(zwischen, xlab = "First Semester Noten", ylab= "Anzahl", main ="Histogramm der First Semester Noten", breaks = 7,  col = "skyblue")
+
+```
+```{r}
+hist(zwischen1, xlab = "First Semester Noten", ylab= "Anzahl", main ="Histogramm der First Semester Noten", breaks = 7,  col = "skyblue")
+
+```
+# Die Spalte "Differenz" wird zum Datensatz hinzugefügt
+
+```{r}
+# Die Spalte "Differenz" wird zum Datensatz hinzugefügt
+student1 <- cbind(student, "Differenz" = zwischen)
+View(student1)
+```
+
+
+```{r}
+hist(student1$Differenz, xlab = "Differenz zwischen First Grade and Second Grade", ylab= "Anzahl", main ="Histogramm der Differenz", breaks =6,  col = "skyblue")
+```
+
+```{r}
+library(car)
+```
+
+
+```{r}
+qqPlot(student1$Differenz, main = "QQPlot für die Var. Differenz")
+```
+
+#### We can do other part of the test with outliers and by removing outliers.
+
+
+```{r}
+
+boxplot(student1$Differenz) # Boxplot
+# Suche der Ausreiser
+outliers <- boxplot(student1$Differenz, plot=FALSE)$out 
+#Ausgabe der Ausreiser
+print(outliers)
+#Wegfilter der Ausreiser
+student_wo <- student1[-which(student1$Differenz %in% outliers),]
+#Boxplot
+boxplot(student_wo$Differenz)
+
+```
+```{r}
+testVER<- t.test(student_wo$G1, student_wo$G2, alternative = "two.sided", paired = TRUE, conf.level = .95)
+
+testVER
+```
+
+```{r}
+testVER<- t.test(student_wo$G1, student_wo$G3, alternative = "two.sided", paired = TRUE, conf.level = .95)
+
+testVER
+```
+```{r}
+eff1 <- sqrt(testVER$statistic^2 / (testVER$statistic^2 + testVER$parameter))
+
+sprintf("Effektstärke: %.4f",eff1)
+```
+
+## 4)	Boxplots 
+
+```{r}
+boxplot(student1$G3 ~student1$Mjob, main = "Boxplots zum Vergleich", ylab = "Final Grade", xlab= "Job of Mother" , col = c("lightgreen", "deepskyblue","tomato", "orange"))
+```
+```{r}
+boxplot(student1$G3 ~student1$Fjob, main = "Boxplots zum Vergleich", ylab = "Final Grade", xlab= "Job of Father" , col = c("lightgreen", "deepskyblue","tomato", "orange"))
+```
+```{r}
+boxplot(student1$G3 ~student1$guardian, main = "Boxplots zum Vergleich", ylab = "Final Grade", xlab= "Guardian" , col = c("lightgreen", "deepskyblue","tomato"))
+```
+
+```{r}
+boxplot(student1$G3 ~student1$reason, main = "Boxplots zum Vergleich", ylab = "Final Grade", xlab= "Reason" , col = c("lightgreen", "deepskyblue","tomato", "orange"))
+```
+
+```{r}
+boxplot(student1$G3 ~student1$Dalc, main = "Boxplots zum Vergleich", ylab = "Final Grade", xlab= "Reason" , col = c("lightgreen", "deepskyblue","tomato", "orange"))
+```
+```{r}
+boxplot(student1$G3 ~student1$Walc, main = "Boxplots zum Vergleich", ylab = "Final Grade", xlab= "Reason" , col = c("lightgreen", "deepskyblue","tomato", "orange"))
+```
+
+```{r}
+boxplot(student1$G3 ~student1$famsup, main = "Boxplots zum Vergleich", ylab = "Final Grade", xlab= "Family " , col = c("lightgreen", "deepskyblue"))
+```
+```{r}
+boxplot(student1$G3 ~student1$schoolsup, main = "Boxplots zum Vergleich", ylab = "Final Grade", xlab= "Family " , col = c("lightgreen", "deepskyblue"))
+```
+
+```{r}
+boxplot(student1$G3 ~student1$studytime, main = "Boxplots zum Vergleich", ylab = "Final Grade", xlab= "Family " , col = c("lightgreen", "deepskyblue"))
+```
+
+
+```{r}
+boxplot(student1$G3 ~student1$traveltime, main = "Boxplots zum Vergleich", ylab = "Final Grade", xlab= "Family " , col = c("lightgreen", "deepskyblue"))
+```
+
+```{r}
+boxplot(student1$G3 ~student1$famsize, main = "Boxplots zum Vergleich", ylab = "Final Grade", xlab= "Family " , col = c("lightgreen", "deepskyblue"))
+```
+
+
+
+
+
+```{r}
+boxplot(student1$G3 ~student1$Medu, main = "Boxplots zum Vergleich", ylab = "Final Grade", xlab= "Family " , col = c("lightgreen", "deepskyblue"))
+```
+
+
+```{r}
+boxplot(student1$G3 ~student1$Fedu, main = "Boxplots zum Vergleich", ylab = "Final Grade", xlab= "Family " , col = c("lightgreen", "deepskyblue"))
+```
+
+## Mehranova
+
+
+## Boxplot
+
+```{r}
+ggplot(student1, aes(sex, G3, fill=factor(Mjob))) +
+geom_boxplot() +
+theme_minimal()+
+labs(fill = "Job of Mother", x="Geschlecht", y="Final Grades")
+```
+
+```{r}
+ggplot(student1, aes(sex, G3, fill=factor(Medu))) +
+geom_boxplot() +
+theme_minimal()+
+labs(fill = "Job of Mother", x="Geschlecht", y="Final Grades")
+```
+```{r}
+ggplot(student1, aes(sex, G3, fill=factor(Fedu))) +
+geom_boxplot() +
+theme_minimal()+
+labs(fill = "Job of Mother", x="Geschlecht", y="Final Grades")
+```
+
+
+
+```{r}
+ggplot(student1, aes(sex, G3, fill=factor(guardian))) +
+geom_boxplot() +
+theme_minimal()+
+labs(fill = "Job of Mother", x="Geschlecht", y="Final Grades")
+```

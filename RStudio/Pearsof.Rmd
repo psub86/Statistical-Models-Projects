@@ -1,0 +1,145 @@
+---
+title: "Pearson Correlation Test"
+output: html_notebook
+---
+## Datensatz: student-mat.csv
+
+```{r}
+student <- read.csv("C:/Users/Alfa/Desktop/Statistik/student.csv")
+View(student)
+
+```
+## Explanation of Columns
+
+
+
+G1
+First period grade (numeric: from 0 to 20)
+
+G3
+Final grade (numeric: from 0 to 20, output target)
+
+## Var 1 = G1 (first semester grade)
+## Var 2 = G3 (final grade)
+
+
+
+
+## 1)	Hypothese 
+
+H1= Es gibt einen Zusammenhang zwischen G1 (First period grade) und G3(Final grade). 
+
+
+
+$$r ≠ 0$$
+
+H0: Es gibt keinen Zusammenhang zwischen G1 (First period grade) und G3(Final grade). 
+
+$$r = 0$$
+
+
+## 2)	Voraussetzungen
+
+Die Variablen sind mindestens intervallskaliert -> Ja, beide Varibalen sind intervallskaliert.
+
+Die Variablen sind normalverteilt (n>30)-> siehe Histogramm
+
+Der untersuchte Zusammenhang zwischen den Variablen muss linear sein -> siehe Streudiagramm
+
+## 3)	Grundlegende Konzepte: Was ist Pearson?
+
+Die Korrelation, auch bivariate Korrelation oder Produkt-Moment-Korrelation genannt, beschreibt den Zusammenhang von zwei intervallskalierten Merkmalen/Variablen einer Zufallsstichprobe. Eine Möglichkeit, die Stärke des Zusammenhangs zu bestimmen, ist die Berechnung des Korrelationskoeffizienten r nach Bravais und Pearson. Voraussetzung ist hierbei, dass es sich um einen linearen Zusammenhang zwischen den analysierten Merkmalen handelt. Zusätzlich wird hier ein ungerichteter Zusammenhang untersucht, d.h. die Variablen sind unabhängig voneinander und folglich werden keine kausalen Aussagen gemacht.
+
+Der Korrelationskoeffizient r kann Werte zwischen -1 und +1 annehmen und ist unabhängig von der Maßeinheit. Ein Wert von -1 beschreibt eine perfekt negative Korrelation und ein Wert von +1 eine perfekt positive Korrelation. Bei r = 0 liegt kein linearer Zusammenhang zwischen den Variablen vor. 
+
+
+#![pearson](zusammenhang.jpg)
+
+
+Achtung: Es kann dennoch ein Zusammenhang bestehen. Dieser ist dann allerdings nicht linear, sondern z.B. exponentiell. Um dies zu prüfen, müssen dann andere Tests angeschlossen werden.
+Bei einer Korrelation wird der ungerichtete lineare Zusammenhang zweier Variablen untersucht. "Ungerichtet" bedeutet, dass nicht von einer abhängigen und einer unabhängigen Variable gesprochen wird. Es werden folglich keine kausalen Aussagen gemacht.
+
+Die Fragestellung einer Korrelation wird oft so verkürzt:
+"Gibt es einen Zusammenhang zwischen zwei Variablen?" 
+
+## 4)	Grafische Veranschaulichung des Zusammenhangs
+
+```{r}
+hist(student$G2, xlab = "First semester grade", ylab= "Number", main ="Histrogram of the first semester grdádes", breaks = 10,  col = "skyblue")
+
+```
+```{r}
+hist(student$G3, xlab = "Final semeter grade", ylab= "Anzahl", main ="Histogram of the final grade", breaks = 20,  col = "skyblue")
+
+```
+ A number of the 0-graded pupils means absence from the tests, So we drop the observations that are 0 in the G3 variable
+
+```{r}
+student <- student[student$G3!= 0, ]
+```
+```{r}
+hist(student$G1, xlab = "First semester grade", ylab= "Number", main ="Histrogram of the first semester grdádes", breaks = 10,  col = "skyblue")
+
+```
+```{r}
+hist(student$G3, xlab = "Final semeter grade", ylab= "Anzahl", main ="Histogram of the final grade", breaks = 20,  col = "skyblue")
+
+```
+Both distributions are normal.
+
+```{r}
+plot(student$G3 ~ student$G1, main = "", xlab = "First Semester Grade", ylab= "Final Grade")
+abline(lm(student$G3 ~ student$G1, data = student), col="tomato")
+```
+There is a linear relation between first semester and final grades and it is probably a linear positive correlation.
+
+5)	Deskriptive Statistik
+
+## 5) Deskriptive Statistik
+
+```{r}
+library(psych)
+describe(student)
+```
+
+## 6)	Ergebnisse der Korrelationsanalyse
+
+```{r}
+test <- cor.test(student$G3, student$G1)
+test
+```
+The R output in Figure shows the correlation coefficient as well as the p-value (significance) and the sample size n (n + 2). It can be seen that there is a connection between G1 (first semester grade) and project success (r = 0.891805, p <2.2e-16, n = 355). Since r has a positive value, a positive linear and significant relationship between G1 and G3 can be assumed. That means: the higher the first semester grade, the better the final grade.
+
+Note: “p-value <2.2e-16”: This number has converted to 16 zeros 0.0000 0000 0000 00022. The number of data records can be taken from the descriptive statistics.
+
+## 7) Berechnung des Bestimmtheitsmasses
+
+$$Bestimmtheitsmaß = r^2*100= 0.891805^2*100 = 79.53$$
+
+
+## 8) Calculation of the effect size
+
+Effect sizes are calculated to assess the significance of a result. In the example, the correlation of the two variables is significant, but the question arises as to whether the relationship is large enough to be classified as significant. The Bravais-Pearson correlation coefficient r is itself a measure of the effect size.
+
+In order to determine how big the found connection is, one can orientate oneself on the classification of Cohen (1992):
+$$\begin{align}
+\text{Schwacher Effekt: } 0.10 &< ||r|| < 0.30 \\
+\text{Schwacher bis mittlerer Effekt: } 0.30 &= ||r|| \\
+\text{Mittlerer Effekt: } 0.30 &< ||r|| < 0.50 \\
+\text{Mittlerer bis starker Effekt: }0.50 &= ||r|| \\
+\text{Starker Effekt: } 0.50 &< ||r|| 
+\end{align}$$
+
+```{r}
+sprintf("The effect size is %.4f.",test$estimate)
+```
+
+Ther is a strong effect size.
+
+
+## 9)	Eine Aussage
+
+****Translate might be improved***
+
+The first semester grade (G1) and the final grade (G3) correlate significantly (r = 0.8918, p <2.2e-16, n = 355). The higher the G1 of a student, the better the final grade. 79.53% of the dispersion of the common variance can be explained by first grade and final grade. According to Cohen (1992), this is a strong effect. H0 can be discarded. 
+

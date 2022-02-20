@@ -1,0 +1,256 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+# Aufgabe 5: Unterschiedshypothese 
+
+## Einlesen der Daten
+
+```{r}
+student <- read.csv("C:/Users/Alfa/Desktop/Statistik/student.csv")
+View(student)
+
+```
+
+G1
+First period grade (numeric: from 0 to 20)
+
+G2
+Second period grade (numeric: from 0 to 20)
+
+G3
+Final grade (numeric: from 0 to 20, output target)
+
+### Datensatz: student
+
+### Var 1 = Note des ersten Semesters der Student (G1)  
+### Var 2 = Abschlussnote der Student (G3)
+
+
+## Aufgabenstellung 
+
+## 1)	Hypothese 
+
+H1: Es gibt einen Unterschied zwischen der Note des ersten Semesters (G1) und der Abschlussnote der Student (G3) 
+
+H0: Es gibt keinen Unterschied zwischen der Note des ersten Semesters (G1) und der Abschlussnote der Student (G3)
+
+
+## 2)	Voraussetzungen des t-Tests für abhängige Stichproben
+
+* Die abhängige Variable G1 (Note des ersten Semesters der Student) und G3 (Abschlussnote der Student) sind intervalskaliert und metrisch.  ✓
+
+* Es liegen zwei verbundene Stichproben oder Gruppen vor, aber die verschiedenen Messwertpaare sind voneinander unabhängig. ✓ 
+
+  - Noten sind verbundenen durch den Student, aber unabhängige, weil es zwei verschiedene Messpaare (G1 und G3) sind.
+
+* Die Unterschiede zwischen den verbundenen Testwerten sind in der Grundgesamtheit normalverteilt (bei Stichproben > 30 sind Verletzungen unproblematisch)
+
+### Prüfung der Normalverteilung (Histogramm)
+
+Erstens prüfen wir die Normalverteilung der einzelnen Noten. Zwar sind die Note des ersten Semesters der Student (G1) und die Abschlussnote der Student (G3).
+
+```{r}
+hist(student$G1, xlab = "First Semester Grade", ylab= "Anzahl", main ="Histogramm of First Semester Grade", breaks = 10,  col = "skyblue")
+
+```
+
+```{r}
+hist(student$G3, xlab = "Final Grade", ylab= "Anzahl", main ="Histogramm of Final Grade", breaks = 12,  col = "skyblue")
+
+```
+Wir haben festgestellt, dass Abschlussnote circa 40 Nullwerte (die Schüler, die den Kurs nicht bestanden haben,) haben.
+Deswegen haben wir diese Note von unserem Datensatz herausgenommen. Außerdem haben wir keine Outlier mehr.
+
+```{r}
+student <- student[student$G3!= 0, ]
+```
+
+```{r}
+colSums(student == 0)
+```
+```{r}
+hist(student$G3, xlab = "Final Grade", ylab= "Anzahl", main ="Histogramm of Final Grade", breaks = 12,  col = "skyblue")
+
+```
+
+```{r}
+# Wir sollen erst Histogram der Differenz überprüfen als eine Voraussetzung der t-test für abhängige Sticproben.
+zwischen <- student$G1 - student$G3 
+zwischen
+```
+# Die Spalte "Differenz" wird zum Datensatz hinzugefügt
+
+```{r}
+# Die Spalte "Differenz" wird zum Datensatz hinzugefügt
+student <- cbind(student, "Differenz" = zwischen)
+View(student)
+```
+
+```{r}
+hist(student$Differenz, xlab = "Differenz zwischen First Grade and Second Grade", ylab= "Anzahl", main ="Histogramm der Differenz", breaks =6,  col = "skyblue")
+```
+
+### Prüfung der Normalverteilung (GGPlot)
+
+```{r}
+library(car)
+```
+
+
+```{r}
+qqPlot(student$Differenz, main = "QQPlot für die Var. Differenz")
+```
+Es liegt eine Normalverteilung vor.
+
+## 3)	Grundlegende Konzepte: Was ist t-Test für abhängige Stichproben?
+
+* Der t-Test für abhängige Stichproben überprüft, ob die Mittelwerte zweier abhängiger/gepaarter Stichproben verschieden sind.
+Von "abhängigen Stichproben" wird gesprochen, wenn der Messwert und ein bestimmter anderer Messwert sich gegenseitig beeinflussen. In folgende Situationen, die sich für eine verbundene Stichprobe eignen.
+
+Messwiederholung:
+Die Messwerte stammen von der gleichen Person z.B. Messzeitpunkt #1 verglichen mit Messzeitpunkt #2.
+
+Natürliche Paare:
+Die Messwerte stammen von verschiedenen Personen, die aber zusammen gehören:Ehefrau – Ehemann, Psychologe – Patient oder Zwillinge.
+
+Matching:
+Die Messwerte stammen ebenfalls von verschiedenen Personen, die einander zugeordnet wurden. Aufgrund eines vergleichbaren Werts (Drittvariablen) werden Matching-Paare gebildet.
+
+## 4)	Deskriptive Statistiken und Korrelation
+
+### Deskriptive Statistiken
+
+```{r}
+library(psych)
+describe(student)
+```
+Es zeigt sich, dass es nahezu keinen Mittelwertsunterschied (Differenz mean=-0.25) zwischen der Note des ersten Semesters der Studenten (G1)  und der Abschlussnote der Studenten (G3). Im Allgemein unterscheiden sich nicht die Mittelwerte. Der Mittelwert der Note des ersten Semesters der Student (G1) ist bei 11.27 (SD = 3.24, n= 357), wohingegen der Mittelwert der Absschlussnote der Studenten 11.52 (SD = 3.23 ,n=357) ist. 
+
+### Korrelation
+
+```{r}
+#library(car)
+scatterplot(student$G3 ~ student$G1 , main = "Streudiagramm zwischen der Note des ersten Semesters und der Abschlussnote", xlab = "Abschlussnote", ylab= "Note des ersten Semesters")
+```
+```{r}
+test <- cor.test(student$G3, student$G1)
+test
+```
+Die Note des ersten Semesters der Studenten (G1) und der Abschlussnote der Studenten korrelieren positiv-linear signifikant (r = .89, p < 2.2e-16, n = 375).
+
+Bei Messwiederholungen ist es möglich, dass die Note des ersten Semesters der Studenten (G1) und die Abschlussnote der Studenten (respektive eines Messwertpaars) miteinander korrelieren. Es ist plausibel, dass zwei verbundene Messungen (Noten)  sich ähnlich sind und dass innerhalb eines Messwertpaares eher geringere Unterschiede auftreten als zwischen den Paaren.
+
+Im R-Output wird daher eine Pearson Korrelation der beiden Messzeitpunkte ausgegeben. Für das Beispiel ergibt sich eine sehr hohe Korrelation von r = .89 ( p < 2.2e-16, n = 375).
+
+## 5)	Ergebnisse des t-Tests für abhängige Stichproben
+
+**alternative = "two.sided"** verwendet eine ungerichtete Hypothese und testet zweiseitig. Falls die Hypothese gerichtet formuliert ist, kann auch "less" oder "greater" verwendet werden. Die Richtung hängt von der Codierung ab. 
+
+**paired = TRUE** ist dann abzuwenden, wenn die Stichprobe verbunden ist. Das **"conf.level = .95"** beschreibt, dass ein Alphanivau von 0.05 verwendet wird. 
+
+```{r}
+testVER<- t.test(student$G1, student$G3, alternative = "two.sided", paired = TRUE, conf.level = .95)
+
+testVER
+```
+Die Teststatistik beträgt t = -3.2012 und der zugehörige Signifikanzwert p = 0.001492. 
+Damit ist der Unterschied signifikant: Die Mittelwerte der beiden Messzeitpunkte (Die Note des ersten Semesters der Studenten (G1) und der Abschlussnote der Studenten) unterscheiden sich (t(356) = -3.2012,, p = 0.001492, n= 357).
+
+
+## 6)	Berechnung der Effektstärke
+
+Die Effektstärke ist ein Maß für die Stärke eines Treatments bzw. Phänomens. Effektstärken sind damit eine der wichtigsten Größen in empirischen Studien. Zur Einschätzung der praktischen Bedeutsamkeit existieren verschiedene Effektstärkemaße, die bei der Interpretation der Größe eines Effektes helfen.
+
+## Cohen und Pearson
+
+```{r}
+eff1 <- sqrt(testVER$statistic^2 / (testVER$statistic^2 + testVER$parameter))
+
+sprintf("Effektstärke: %.4f",eff1)
+```
+Zur Beurteilung der Groesse des Effektes dient die Einteilung von Cohen (1992):
+
+$$\begin{align}
+\text{Schwacher Effekt: } 0.10 &< ||r|| < 0.30             \\
+\text{Schwacher bis mittlerer Effekt: } 0.30 &= ||r||      \\
+\text{Mittlerer Effekt: } 0.30 &< ||r|| < 0.50             \\
+\text{Mittlerer bis starker Effekt: }0.50 &= ||r||         \\
+\text{Starker Effekt: } 0.50 &< ||r||        
+\end{align}$$
+
+Damit entspricht schwacher Effektstärke, das die Effektstärke 0.167 ist.
+
+## Alternative (Hedges g)
+
+```{r}
+diff <- testVER$estimate
+
+sed <- sd(student$G1 - student$G3)
+
+g <- diff/sed
+
+sprintf("Effektstärke: %.4f",g)
+
+```
+Damit entspricht schwacher Effektstärke, das die Effektstärke 0.169 ist.
+
+## 7) Aussage
+
+
+* Es zeigt sich, dass die Note des ersten Semesters der Studenten (G1) und die Abschlussnote der Studenten statistisch signifikant sich unterscheiden (t(356) = -3.2012,, p = 0.001492, n= 357). Die Abschlussnote sind besser (M = 11.52, SD = 3.44) als die Note des ersten Semesters (M = , SD = ). Die Effektstärke nach Cohen (1992) liegt bei r = 0.167 und entspricht damit einem schwacheren Effekt. H0 kann normalerweise verworfen werden. 
+
+* Wenn wir aber Mittelwerte dieser beiden Noten berücksichtigen, fällt uns schwer H1 ohne Verzögerung zu akzeptieren.
+
+* Obwohl sich die Noten statistich signifikant unterscheiden, wenn wir die Mittelwerte in Betracht ziehen, ist es sinnvoller H0 zu akzeptieren und H1 zu verwerfen.
+
+
+## 4)	Boxplots 
+
+```{r}
+boxplot(student$G3 ~student$Mjob, main = "Boxplots zum Vergleich", ylab = "Final Grade", xlab= "Job of Mother" , col = c("lightgreen", "deepskyblue","tomato", "orange"))
+```
+
+```{r}
+boxplot(student$G3 ~student$Fjob, main = "Boxplots zum Vergleich", ylab = "Final Grade", xlab= "Job of Father" , col = c("lightgreen", "deepskyblue","tomato", "orange"))
+```
+
+```{r}
+boxplot(student$G3 ~student$studytime, main = "Boxplots zum Vergleich", ylab = "Final Grade", xlab= "Family " , col = c("lightgreen", "deepskyblue"))
+```
+
+```{r}
+boxplot(student$G3 ~student$school, main = "Boxplots zum Vergleich", ylab = "Final Grade", xlab= "Schule" , col = c("lightgreen", "deepskyblue"))
+```
+```{r}
+boxplot(student$G3 ~student$guardian, main = "Boxplots zum Vergleich", ylab = "Final Grade", xlab= "Guardian" , col = c("lightgreen", "deepskyblue","tomato"))
+```
+
+
+```{r}
+boxplot(student$G3 ~student$reason, main = "Boxplots zum Vergleich", ylab = "Final Grade", xlab= "Reason" , col = c("lightgreen", "deepskyblue","tomato", "orange"))
+```
+
+
+
+```{r}
+boxplot(student$G3 ~student$Dalc, main = "Boxplots zum Vergleich", ylab = "Final Grade", xlab= "Reason" , col = c("lightgreen", "deepskyblue","tomato", "orange"))
+```
+
+
+
+```{r}
+boxplot(student$G3 ~student$Walc, main = "Boxplots zum Vergleich", ylab = "Final Grade", xlab= "Reason" , col = c("lightgreen", "deepskyblue","tomato", "orange"))
+```
+
+
+
+```{r}
+boxplot(student$G3 ~student$famsup, main = "Boxplots zum Vergleich", ylab = "Final Grade", xlab= "Family " , col = c("lightgreen", "deepskyblue"))
+```
+
+
+```{r}
+boxplot(student$G3 ~student$schoolsup, main = "Boxplots zum Vergleich", ylab = "Final Grade", xlab= "Family " , col = c("lightgreen", "deepskyblue"))
+```

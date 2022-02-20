@@ -1,0 +1,239 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+# Aufgabe 6: Unterschiedshypothese 
+
+## Einlesen der Daten
+
+```{r}
+student <- read.csv("C:/Users/Alfa/Desktop/Statistik/student.csv")
+View(student)
+
+```
+
+Datensatz:
+Var 1 = Job der Mutter (Mjob)
+Var 2 = Abschlussnote der Studenten (G3)
+
+## Aufgabenstellung 
+
+# Einfaktoriellen Varianzanalyse ohne Messwiederholung
+
+## 1)	Hypothese 
+
+Der einfaktoriellen Varianzanalyse Hypothese
+
+H1: Die Jobs der Mütter (Mjob-Teacher, Health, Services (e.g. administrative or police), At_home or Other) 
+haben einen Einfluss auf den Mittelwertunterschied der Abschlussnoten der Studenten (G3). 
+
+  
+$$M_T≠M_H≠M_S≠M_A≠M_O  \rightarrow \text{für min. einen Vergleich}$$
+
+H0:  Die Jobs der Mütter  (Mjob- Teacher, Health, Services (e.g. administrative or police), At_home or Other) 
+haben keinen Einfluss auf den Mittelwertunterschied der Abschlussnoten der Studenten (G3). 
+
+
+## 2)	Voraussetzungen für die einfaktoriellen Varianzanalyse ohne Messwiederholung
+
+✓	Die abhängige Variable "Abschlussnote" ist intervallskaliert (Metric)
+--> 'Abschlussnote' ist metrisch.  
+
+✓Die unabhängige Variable (bzw. Faktor) 'Mutterjob(Mjob)' ist kategorial (nominal- oder ordinalskaliert)  
+--> Der 'Mutterjob' (Teacher, Health, Services (e.g. administrative or police), At_home or Other) ist nominalskaliert.
+
+✓	Die durch den Faktor gebildeten Gruppen sind unabhängig 
+--> Es bildet sich fünf unabhängige Gruppen.
+
+✓	Die abhängige Variablen ist normalverteilt innerhalb jeder der Gruppen (Ab > 25 Probanden pro Gruppe sind Verletzungen in der Regel unproblematisch)
+--> Siehe Histogramm
+
+✓ Homogenität der Varianzen: Die Gruppen stammen aus Grundgesamtheiten mit annähernd identischen Varianzen der abhängigen Variablen -> Levene-Test
+--> siehe Levene-Test (Korrektur mit Welch-Test muss durchgeführt werden, siehe unten)
+
+------------
+Wir haben vorher festgestellt, dass Abschlussnote circa 40 Nullwerte (die Schüler, die den Kurs nicht bestanden haben,) haben.
+Deswegen haben wir diese Note von unserem Datensatz herausgenommen. Außerdem haben wir keine Outlier mehr.
+
+```{r}
+student <- student[student$G3!= 0, ]
+```
+
+```{r}
+colSums(student == 0)
+```
+### Normalverteilung (Histogramm)
+
+```{r}
+library(ggplot2)
+library(car)
+library(dplyr)
+```
+
+```{r}
+student %>%
+  group_by(Mjob) %>%
+  ggplot(aes(G3, color=Mjob)) + 
+  geom_histogram(aes(fill = Mjob), bins =10) +
+  facet_wrap(~Mjob) +
+  theme_grey()+
+  labs(x= "Abschlussnote",y = "Anzahl" )
+```
+Die Daten sind normalverteilt, wenn auch nicht perfekt.
+
+### Alternative QQPlot
+
+```{r}
+qqPlot(G3 ~ Mjob, data=student, 
+       layout=c(1, 5))
+```
+
+## 3)	Grundlegende Konzepte: Was ist die einfaktoriellen Varianzanalyse ohne Messwiederholung
+
+* Die einfaktorielle Varianzanalyse – auch "einfaktorielle ANOVA", da in Englisch "Analysis of Variance" – testet, ob sich die Mittelwerte mehrerer unabhängiger Gruppen (oder Stichproben) unterscheiden, die durch eine kategoriale unabhängige Variable definiert werden. 
+
+* Diese kategoriale unabhängige Variable wird im Kontext der Varianzanalyse als "Faktor" bezeichnet. Entsprechend werden die Ausprägungen der unabhängigen Variable "Faktorstufen" genannt, wobei auch der Begriff der "Treatments" gebräuchlich ist. 
+
+* Als "einfaktoriell" wird eine Varianzanalyse bezeichnet, wenn sie lediglich einen Faktor, also eine Gruppierungsvariable, verwendet mehrfaktorielle Varianzanalyse).
+
+## 4) Boxplot
+
+```{r}
+boxplot(student$G3 ~student$Mjob, main = "Boxplots zum Vergleich", ylab = "Final Grade", xlab= "Job of Mother" , col = c("lightgreen", "deepskyblue","tomato", "orange","blue"))
+```
+Folgende zwei Aussagen sind hier sehr wichtig:  
+Boxplots zeigen hier keine Ausreisser. 
+
+Die Verteilungen scheinen sich nicht deutlich von einander zu unterscheiden.
+
+Pattern:
+-----------
+Die Jobs der Mütter 'Health', 'Services' und 'Teacher' haben wahrscheinlich einen kleinen positiven Einfluss auf der Abschlussnoten.
+
+Die Jobs der Mütter 'at_home' und 'other' haben einen ähnlichen Einfluss auf der Abschlussnoten. 
+
+## 5)	Deskriptive Statistiken 
+
+
+```{r}
+student %>%
+group_by(Mjob) %>%
+  summarize(Anzahl = n(), Mittelwert = mean(G3), Median = median(G3), Standardabweichung = sd(G3)) %>%
+  mutate_if(is.numeric, round, 2)
+```
+* Es gibt einen Mittelwertsunterschied zwischen den Gruppen. Jobart "Health" (M = 12.91, SD = 2.99, N=32) hat den besten positiven Einfluss auf Abschlussnote, gefolgt von Jobart Services (M= 12.07, SD = 3.46, N=94) und Jobart Teacher (M= 11.87, SD = 3.30, N=54).   
+
+* Jobart "At_home" (M= 10.80, SD = 2.89, N=50) und "Other"(M= 10.91, SD = 3.04, N=127) haben ähnlichen Einfluss auf die Abschlussnote der Studenten.
+
+* Wie bereits beim Boxplot zu erkennen war, ist der Abstand der Mittelwert der Jobart "Health", "Services" und "Teacher" ähnlich ausgefallen.
+
+## 6)	Prüfung der Varianzhomogenität (Levene-Test)
+
+```{r}
+leveneTest(student$G3 ~ student$Mjob, center="mean")
+```
+Im vorliegenden Beispiel ist der Levene-Test NICHT signifikant(F(4,352) = 1.279, p = 0.2775), so dass von Varianzhomogenität ausgegangen werden kann. Das heisst - es muss eine Welch-Korrektur durchgeführt werden.
+
+Mit Welch-Korrektur: p < 0.05 => Ergebnis Signifikant –> Varianzen heterogen
+
+Ohne Welch-Korrektur: p > 0.05 => Ergebnis nicht Signifikant –> Varianzen homogen –> H0 mit Annahme Var1=Var2=… -> Var_n wird angenommen.
+
+Deswegen sollten wir Ohne Welch-Korrektur durchführen.
+
+
+## 7)	Ergebnisse der einfaktoriellen Varianzanalyse ohne Messwiederholung
+
+```{r}
+ANOVA <- aov(data=student, student$G3~student$Mjob)
+summary(ANOVA)
+
+```
+Das Gesamtmodel ist signifikant geworden (F(4,352) = 4.25 , p = 0.002). 
+
+Allerdings lässt sich aufgrund dieses Tests nicht bestimmen, welche der vier Gruppen sich signifikant voneinander unterscheiden. Es ist denkbar, dass sich lediglich ein Paar signifikant unterscheidet und zwischen den übrigen keine signifikanten Unterschiede vorliegen. Daher wird ein Post-hoc-Test durchgeführt.
+
+
+## 8)	Post-hoc-Tests
+
+```{r}
+TukeyHSD(aov(data=student, student$G3~student$Mjob))
+```
+Ergebnis:
+------------------
+* Nur "Health", "At_Home" (p=0.0291222) Jobarten und "Other", "Health"  (p=0.0133487) Jobarten  unterscheiden sich signifikant von einander. 
+
+* Die anderen Jobarten unterscheiden sich nicht voneinander.(p < .05).
+
+* Es können also zwei unabhängige/ generalisierbare (Erste Gruppe:at_home, other - Zweite Gruppe:health, service, teacher) Gruppen von Jobarten der Mütter gebildet werden.
+
+
+## 9)	Profildiagramm
+
+```{r}
+ggplot(student, aes(x=Mjob, y=G3, group=1))+
+  stat_summary(fun.y = mean, geom="point", size=3)+
+  stat_summary(fun.y = mean, geom="line")+
+  stat_summary(fun.data = mean_cl_normal, geom="errorbar",width=.2, size=.25)+
+  labs(x="Mutterjob", y="Abschlussnote")+
+  theme_classic()
+```
+
+## 10)	Berechnung der Effektstärke
+
+Um die Bedeutsamkeit eines Ergebnisses zu beurteilen, werden Effektstärken berechnet. Im Beispiel sind zwar einige der Mittelwertsunterschiede zwar signifikant, doch es stellt sich die Frage, ob sie gross genug sind, um als bedeutend eingestuft zu werden.
+
+Es gibt **zwei Arten** eine Effektstärken für diesen Test. 
+
+### Variante 1:
+
+$$ η²= \frac{QS_{zwischen}}{QS_{total}}$$
+
+```{r}
+library(lsr) 
+etaSquared(ANOVA)
+
+```
+
+η² = .01 entspricht einem schwachen Effekt<br>
+η² = .06 entspricht einem mittleren Effekt<br>
+η² = .14 entspricht einem starken Effekt<br>
+
+Es liegt ein schwacher Effekt vor.
+
+###  Das partielle Eta-Quadrat
+
+Das partielle Eta-Quadrat setzt die Variation, die durch einen Faktor erklärt wird, in Bezug mit jener Variation, die nicht durch andere Faktoren im Modell erklärt wird. Das heisst, es wird ausschliesslich jene Variation betrachtet, welche nicht durch die anderen Faktoren im Modell erklärt wird. Das partielle Eta-Quadrat zeigt, welchen Anteil davon ein Faktor erklärt. Im Falle der einfaktoriellen Varianzanalyse ist das partielle Eta-Quadrat ist jener Anteil der korrigierten Gesamtvariation, der durch das Modell erklärt wird.
+
+
+$$ η²_{\mathrm{par}}= \frac{QS_{zwischen}}{QS_{zwischen}+QS_{inn}}$$
+
+
+```{r}
+library(sjstats)
+effectsize::eta_squared(ANOVA, partial = TRUE)
+eta
+```
+Im vorliegenden Beispiel beträgt das partielle Eta-Quadrat .05. Das heisst, es wird 5 % der Variation der Abschlussnoten durch Jobarten der Mütter aufgeklärt.
+
+
+
+## 11)	Eine Aussage
+
+* Jobarten der Mütter haben einen signifikanten Einfluss auf die Abschlussnote (F(4,352) = 4.25 , p = 0.002). 5 % der Streuung der Abschlussnoten um den Gesamtmittelwert kann durch die Jobarteb der Mütter erklärt werden. Die Effektstärke #nach Cohen (1988)# liegt bei f = ... und entspricht einem schwachen Effekt. 
+
+
+* Post-hoc-Tests mit Tukey zeigen, dass sich zwei Gruppen von Jobarten der Mütter bilden lassen (alle p < .05): Jobarten "Health" (M 38.82, SD = 3.99,N=29), "Service" (M 38.82, SD = 3.99,N=29) und "Teacher" (M 38.82, SD = 3.99,N=29) bilden sich die erste Gruppe. Jobarten "Other" (M 38.82, SD = 3.99,N=29) und "At_Home" (M 38.82, SD = 3.99,N=29) bilden sich die zweite Gruppe. 
+
+* Damit kann festgehalten werden, dassnur "Health", "At_Home" (p=0.0291222) Jobarten und "Other", "Health"  (p=0.0133487) Jobarten  unterscheiden sich signifikant von einander. 
+Die anderen Jobarten unterscheiden sich nicht voneinander.(p < .05). #H0 wird abgelehnt, H1 angenommen.#
+
+* Nur folgende Gruppen unterscheiden sich voneinander signifikant (p < 0.05):  
+
++ Health-At_Home  
++ Other-Health
+
+Somit wird insgeamt H0 wird abgelehnt und H1 angenommen, mit der Einschränkung, dass allerdings zwischen den beiden ####
+
+
+
+
